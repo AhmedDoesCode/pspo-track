@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 
-/* ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-   PSPO I Trainer â grounded in the 2020 Scrum Guide
+/* ──────────────────────────────────────────────────────────────────────────
+   PSPO I Trainer — grounded in the 2020 Scrum Guide
    Single-file React artifact. Persistent progress via window.storage.
    Personalized wrong-answer feedback via Anthropic API in artifacts.
-   ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+   ────────────────────────────────────────────────────────────────────────── */
 
 const CONCEPTS = [
   { id: 'scrum_theory',         label: 'Scrum Theory',            subtitle: 'Empiricism, values, pillars' },
@@ -21,33 +21,33 @@ const CONCEPTS = [
 
 const LESSONS = {
   scrum_theory: {
-    intro: `Before you learn what a Product Owner does or how Sprint Planning works, you need to understand why Scrum exists. Every rule in Scrum â the tiny timeboxes, the fixed events, the stubborn refusal to plan far ahead â comes from one belief: product development is complex, and complexity doesn't yield to detailed upfront plans. Plan too far and reality embarrasses you. Plan too little and you wander. Scrum is the minimum viable structure for learning your way through complexity.`,
+    intro: `Before you learn what a Product Owner does or how Sprint Planning works, you need to understand why Scrum exists. Every rule in Scrum — the tiny timeboxes, the fixed events, the stubborn refusal to plan far ahead — comes from one belief: product development is complex, and complexity doesn't yield to detailed upfront plans. Plan too far and reality embarrasses you. Plan too little and you wander. Scrum is the minimum viable structure for learning your way through complexity.`,
     sections: [
       {
         heading: 'Empiricism vs defined process',
-        body: `There are two ways to manage work. A defined process assumes you know enough upfront to specify exactly what will happen. Write a recipe, follow it, get the expected cake. This works when inputs, processes, and outputs are predictable â manufacturing a car part, for instance.
+        body: `There are two ways to manage work. A defined process assumes you know enough upfront to specify exactly what will happen. Write a recipe, follow it, get the expected cake. This works when inputs, processes, and outputs are predictable — manufacturing a car part, for instance.
 
 An empirical process assumes you don't know enough. You try things, observe, adjust. Empiricism is how scientists work, how startups iterate, and how Scrum approaches product development.
 
-Scrum takes a firm position: product development is complex. You don't know what users want until they try it. You don't know what will work technically until you build it. Pretending otherwise â via multi-year roadmaps, rigid scope, locked-in plans â doesn't eliminate uncertainty. It hides it.`,
+Scrum takes a firm position: product development is complex. You don't know what users want until they try it. You don't know what will work technically until you build it. Pretending otherwise — via multi-year roadmaps, rigid scope, locked-in plans — doesn't eliminate uncertainty. It hides it.`,
         example: {
           title: 'Recipe vs forecast',
           body: `A chocolate chip cookie recipe is a defined process: same inputs, same output. You don't need weekly reviews of the recipe because there's nothing to inspect.
 
-Weather forecasting is empirical. Meteorologists run models, compare them to reality, update the models, run them again. They don't "decide" what the weather will be â they observe, inspect, and adapt. That's Scrum's world.`
+Weather forecasting is empirical. Meteorologists run models, compare them to reality, update the models, run them again. They don't "decide" what the weather will be — they observe, inspect, and adapt. That's Scrum's world.`
         }
       },
       {
         heading: 'The three pillars',
         body: `Empiricism in Scrum sits on three pillars, and the order matters.
 
-Transparency â the work and process must be visible to those responsible for outcomes. If the Product Backlog is opaque, if the Increment isn't real, if people guess at progress, you have nothing honest to inspect.
+Transparency — the work and process must be visible to those responsible for outcomes. If the Product Backlog is opaque, if the Increment isn't real, if people guess at progress, you have nothing honest to inspect.
 
-Inspection â artifacts and progress toward goals must be checked frequently to catch problems early. Inspection only works if transparency is real. Inspecting vague status updates teaches you nothing.
+Inspection — artifacts and progress toward goals must be checked frequently to catch problems early. Inspection only works if transparency is real. Inspecting vague status updates teaches you nothing.
 
-Adaptation â when inspection reveals drift or failure, the process, work, or product must be adjusted. You can only adapt what you inspected, and you can only inspect what was transparent.
+Adaptation — when inspection reveals drift or failure, the process, work, or product must be adjusted. You can only adapt what you inspected, and you can only inspect what was transparent.
 
-It's a causal chain. Break the first link and the whole chain collapses. This is why "we have daily standups" without real transparency produces no Scrum benefit â the ritual is there but the mechanism isn't.`
+It's a causal chain. Break the first link and the whole chain collapses. This is why "we have daily standups" without real transparency produces no Scrum benefit — the ritual is there but the mechanism isn't.`
       },
       {
         heading: 'The five values',
@@ -57,55 +57,55 @@ Commitment: the team commits to achieving the Sprint Goal and to each other.
 Focus: everyone focuses on the Sprint's work and the team's goals.
 Openness: the team is honest about progress, challenges, even uncomfortable truths.
 Respect: members respect each other as capable, independent professionals.
-Courage: courage to do the right thing and work on tough problems â including telling the truth about bad news.
+Courage: courage to do the right thing and work on tough problems — including telling the truth about bad news.
 
 Values aren't decoration. Without courage, no one admits the Sprint is in trouble. Without openness, inspection finds nothing. Without respect, self-management devolves into dysfunction. The pillars can only stand if the values hold.`
       }
     ],
     visual: `<svg viewBox="0 0 420 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:420px;margin:0 auto;display:block"><defs><marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e8a838"/></marker></defs><rect x="10" y="60" width="110" height="100" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.7"/><rect x="155" y="60" width="110" height="100" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.7"/><rect x="300" y="60" width="110" height="100" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.7"/><text x="65" y="50" text-anchor="middle" fill="#e8a838" font-size="10" font-family="JetBrains Mono, monospace" letter-spacing="1.2">TRANSPARENCY</text><text x="210" y="50" text-anchor="middle" fill="#e8a838" font-size="10" font-family="JetBrains Mono, monospace" letter-spacing="1.2">INSPECTION</text><text x="355" y="50" text-anchor="middle" fill="#e8a838" font-size="10" font-family="JetBrains Mono, monospace" letter-spacing="1.2">ADAPTATION</text><text x="65" y="115" text-anchor="middle" fill="currentColor" font-size="16" font-family="Fraunces, serif" font-style="italic" opacity="0.75">see it</text><text x="210" y="115" text-anchor="middle" fill="currentColor" font-size="16" font-family="Fraunces, serif" font-style="italic" opacity="0.75">check it</text><text x="355" y="115" text-anchor="middle" fill="currentColor" font-size="16" font-family="Fraunces, serif" font-style="italic" opacity="0.75">change it</text><text x="65" y="145" text-anchor="middle" fill="currentColor" font-size="10" opacity="0.45">(make it visible)</text><text x="210" y="145" text-anchor="middle" fill="currentColor" font-size="10" opacity="0.45">(inspect regularly)</text><text x="355" y="145" text-anchor="middle" fill="currentColor" font-size="10" opacity="0.45">(adjust course)</text><path d="M 122 110 L 153 110" stroke="#e8a838" stroke-width="1.5" fill="none" marker-end="url(#ar1)"/><path d="M 267 110 L 298 110" stroke="#e8a838" stroke-width="1.5" fill="none" marker-end="url(#ar1)"/><path d="M 355 162 Q 210 195 65 162" stroke="#e8a838" stroke-width="1" fill="none" stroke-dasharray="3 3" opacity="0.5" marker-end="url(#ar1)"/><text x="210" y="190" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.5" font-family="JetBrains Mono, monospace" letter-spacing="1">loop continues</text></svg>`,
     mnemonics: [
-      { label: 'T.I.A.', text: 'The three pillars, in causal order. Transparency â Inspection â Adaptation.' },
+      { label: 'T.I.A.', text: 'The three pillars, in causal order. Transparency → Inspection → Adaptation.' },
       { label: 'F.O.C.R.C.', text: 'The five values. Focus, Openness, Commitment, Respect, Courage.' }
     ],
     tips: [
       'On the exam, "framework" is the correct word for Scrum. Never "methodology," "process," or "best practice."',
       'If a question asks what\'s broken when adaptation fails, look one step back: inspection probably isn\'t real. And if inspection isn\'t real, transparency is missing.',
       'The 2020 Scrum Guide added "lean thinking" as a foundation alongside empiricism. Both point to the same conclusion: keep the framework minimal, cut waste.',
-      'Pillars describe the process (Transparency, Inspection, Adaptation). Values describe the team (Commitment, Focus, Openness, Respect, Courage). Don\'t mix them up â common trap.'
+      'Pillars describe the process (Transparency, Inspection, Adaptation). Values describe the team (Commitment, Focus, Openness, Respect, Courage). Don\'t mix them up — common trap.'
     ],
     keyPoints: [
-      'Three pillars: Transparency, Inspection, Adaptation â in that order. You can\'t adapt what you can\'t inspect, and you can\'t inspect what isn\'t transparent.',
+      'Three pillars: Transparency, Inspection, Adaptation — in that order. You can\'t adapt what you can\'t inspect, and you can\'t inspect what isn\'t transparent.',
       'Five values: Commitment, Focus, Openness, Respect, Courage.',
       'Scrum is a framework, not a methodology. It is purposefully incomplete.',
       'Each element serves a specific purpose. Changing or removing parts obscures problems and reduces Scrum\'s benefits.'
     ],
     traps: [
       'Scrum is often mis-described as a methodology or a process. The Scrum Guide explicitly calls it a framework.',
-      '"Inspection" is sometimes confused with "Commitment" as a pillar â it is not. Commitment is a value.',
+      '"Inspection" is sometimes confused with "Commitment" as a pillar — it is not. Commitment is a value.',
       'Empirical process control predates Scrum; Scrum applies it. Don\'t confuse "Scrum is based on empiricism" with "Scrum invented empiricism."'
     ]
   },
   scrum_team: {
-    intro: `The Scrum Team is the atomic unit of Scrum. Everything in the framework â the events, the artifacts, the commitments â exists to make this unit effective. Understanding what a Scrum Team is, and crucially what it isn't, prevents most of the exam's "role" traps.`,
+    intro: `The Scrum Team is the atomic unit of Scrum. Everything in the framework — the events, the artifacts, the commitments — exists to make this unit effective. Understanding what a Scrum Team is, and crucially what it isn't, prevents most of the exam's "role" traps.`,
     sections: [
       {
         heading: 'What the Scrum Team is',
-        body: `A Scrum Team is one Product Owner, one Scrum Master, and Developers â together, as a single unit. Ten or fewer people total. No sub-teams. No internal hierarchies.
+        body: `A Scrum Team is one Product Owner, one Scrum Master, and Developers — together, as a single unit. Ten or fewer people total. No sub-teams. No internal hierarchies.
 
-The 2020 Scrum Guide made a deliberate shift: it stopped calling these "roles" and started calling them "accountabilities." The difference matters. A role describes what you do. An accountability describes what you own the outcome of. A Product Owner doesn't do all the product work â they're accountable for the value of it. A Scrum Master doesn't run the team â they're accountable for the team's effectiveness at Scrum.
+The 2020 Scrum Guide made a deliberate shift: it stopped calling these "roles" and started calling them "accountabilities." The difference matters. A role describes what you do. An accountability describes what you own the outcome of. A Product Owner doesn't do all the product work — they're accountable for the value of it. A Scrum Master doesn't run the team — they're accountable for the team's effectiveness at Scrum.
 
 The Scrum Team focuses on one objective at a time: the Product Goal. Not three parallel initiatives. Not a portfolio of priorities. One goal.`
       },
       {
         heading: 'Cross-functional: the team, not the person',
-        body: `Cross-functional is probably the single most misunderstood term in Scrum. It does not mean every Developer is a full-stack expert who can design, code, and test. It means the team collectively has every skill needed to create a valuable Increment each Sprint â without waiting for external specialists.
+        body: `Cross-functional is probably the single most misunderstood term in Scrum. It does not mean every Developer is a full-stack expert who can design, code, and test. It means the team collectively has every skill needed to create a valuable Increment each Sprint — without waiting for external specialists.
 
 If your team needs a database expert and the only one in the company is three departments away, and you can't complete a Sprint without them, your team isn't cross-functional. That dependency is precisely what cross-functionality is supposed to eliminate.`,
         example: {
           title: 'The restaurant analogy',
           body: `A good restaurant kitchen is cross-functional. It has a chef, line cooks, a dishwasher, a pastry person. No single person does everything. But the kitchen, as a unit, can take a raw order and produce a finished dish without calling another kitchen for help.
 
-If the dessert menu requires calling the cafÃ© next door every time someone orders cake, the kitchen isn't cross-functional for desserts. Same idea for a Scrum Team: the unit must be able to deliver end-to-end.`
+If the dessert menu requires calling the café next door every time someone orders cake, the kitchen isn't cross-functional for desserts. Same idea for a Scrum Team: the unit must be able to deliver end-to-end.`
         }
       },
       {
@@ -113,28 +113,28 @@ If the dessert menu requires calling the cafÃ© next door every time someone or
         body: `Self-management means the team decides internally who does what, when, and how. No one outside the team assigns tasks to Developers. No manager tells the Scrum Master how to coach. The Product Owner decides what's on the Product Backlog without anyone overruling them.
 
 Self-management is NOT:
-â¢ Skipping Scrum events because the team doesn't feel like doing them today.
-â¢ Ignoring the Definition of Done because it's inconvenient.
-â¢ Choosing your own Sprint length of six weeks.
+• Skipping Scrum events because the team doesn't feel like doing them today.
+• Ignoring the Definition of Done because it's inconvenient.
+• Choosing your own Sprint length of six weeks.
 
-Self-management operates within the Scrum framework, not above it. The events, the artifacts, the timeboxes â those are the framework. Inside that framework, the team is sovereign.`
+Self-management operates within the Scrum framework, not above it. The events, the artifacts, the timeboxes — those are the framework. Inside that framework, the team is sovereign.`
       },
       {
         heading: 'Why "10 or fewer"',
-        body: `The Scrum Guide says the Scrum Team is "typically 10 or fewer people." It removed the old "3â9 Developers" rule in 2020. The constraint is about communication: as teams grow, communication paths grow combinatorially. A 10-person team has 45 potential conversation pairs; a 15-person team has 105.
+        body: `The Scrum Guide says the Scrum Team is "typically 10 or fewer people." It removed the old "3–9 Developers" rule in 2020. The constraint is about communication: as teams grow, communication paths grow combinatorially. A 10-person team has 45 potential conversation pairs; a 15-person team has 105.
 
-Smaller teams communicate more. They also self-manage better. When membership must change â and sometimes it must â expect a short-term productivity drop while the team re-forms. Frequent rotation is expensive.`
+Smaller teams communicate more. They also self-manage better. When membership must change — and sometimes it must — expect a short-term productivity drop while the team re-forms. Frequent rotation is expensive.`
       }
     ],
     mnemonics: [
-      { label: 'P.O. Â· S.M. Â· Devs', text: 'The three accountabilities. One Product Owner. One Scrum Master. Everyone else is a Developer â regardless of specialty.' },
-      { label: '1 goal Â· 1 team Â· â¤10 people', text: 'The three numbers to memorize.' }
+      { label: 'P.O. · S.M. · Devs', text: 'The three accountabilities. One Product Owner. One Scrum Master. Everyone else is a Developer — regardless of specialty.' },
+      { label: '1 goal · 1 team · ≤10 people', text: 'The three numbers to memorize.' }
     ],
     tips: [
       'If an exam question lists "Testers," "Architects," or "Business Analysts" as separate team members, it\'s testing whether you know the 2020 Scrum Guide eliminated sub-titles. They\'re all Developers.',
       'Can the PO also be a Developer? Yes. The Scrum Guide doesn\'t prohibit it. What matters is clarity of accountability.',
-      'When a question asks about team formation ("divide 100 people into teams"), the correct answer almost always involves self-organization â not manager assignment.',
-      'Cross-functional â  every individual has all skills. It means the Developers collectively have all the development skills needed.'
+      'When a question asks about team formation ("divide 100 people into teams"), the correct answer almost always involves self-organization — not manager assignment.',
+      'Cross-functional ≠ every individual has all skills. It means the Developers collectively have all the development skills needed.'
     ],
     keyPoints: [
       'Accountabilities (not "roles"): Product Owner, Scrum Master, Developers.',
@@ -143,14 +143,14 @@ Smaller teams communicate more. They also self-manage better. When membership mu
       'The whole Scrum Team is accountable for creating a valuable, useful Increment every Sprint.'
     ],
     traps: [
-      'Cross-functional means the TEAM has the skills â not every person. A Developer doesn\'t need to be a full-stack dev + tester + designer.',
-      'Self-management â  deciding which Scrum events to skip. All events are required.',
+      'Cross-functional means the TEAM has the skills — not every person. A Developer doesn\'t need to be a full-stack dev + tester + designer.',
+      'Self-management ≠ deciding which Scrum events to skip. All events are required.',
       'The PO can be a Developer at the same time. Not forbidden.',
       'Membership changes should be rare; changes cause short-term productivity drops.'
     ]
   },
   product_owner: {
-    intro: `The Product Owner is the most commonly misunderstood accountability in Scrum â and the one you need to understand most deeply because it's the role you're preparing to take. On paper, the job is simple: maximize value. In practice, that single sentence hides a hundred judgment calls about what value means, whose value counts, and how to trade competing priorities.`,
+    intro: `The Product Owner is the most commonly misunderstood accountability in Scrum — and the one you need to understand most deeply because it's the role you're preparing to take. On paper, the job is simple: maximize value. In practice, that single sentence hides a hundred judgment calls about what value means, whose value counts, and how to trade competing priorities.`,
     sections: [
       {
         heading: 'One person. Accountable for value.',
@@ -158,7 +158,7 @@ Smaller teams communicate more. They also self-manage better. When membership mu
 
 One: the PO is a single person, not a committee, not a rotating seat. Why? Decision latency. Committees can't make fast trade-offs. When the Developers hit a surprise mid-Sprint and need a clarification in twenty minutes, a single accountable person can answer. A committee can't.
 
-Accountable: not "does the work," but "owns the outcome." The PO can delegate writing Product Backlog items, running refinement sessions, even ordering parts of the Backlog â but they stay accountable if things go wrong.
+Accountable: not "does the work," but "owns the outcome." The PO can delegate writing Product Backlog items, running refinement sessions, even ordering parts of the Backlog — but they stay accountable if things go wrong.
 
 Value: not scope, not features, not velocity. Value is outcome for users, customers, and the business. Shipping ten features that nobody uses produces zero value. Shipping one feature that moves a key metric produces all the value.`
       },
@@ -166,10 +166,10 @@ Value: not scope, not features, not velocity. Value is outcome for users, custom
         heading: 'What the PO actually does',
         body: `The Scrum Guide lists four responsibilities the PO owns:
 
-1. Developing and explicitly communicating the Product Goal â the long-term objective that unifies Sprints.
-2. Creating and clearly communicating Product Backlog items â so the Developers know what and why.
-3. Ordering Product Backlog items â reflecting the team's best current understanding of value, risk, and dependencies.
-4. Ensuring the Product Backlog is transparent, visible, and understood â everyone working on or with the product can see what's coming.
+1. Developing and explicitly communicating the Product Goal — the long-term objective that unifies Sprints.
+2. Creating and clearly communicating Product Backlog items — so the Developers know what and why.
+3. Ordering Product Backlog items — reflecting the team's best current understanding of value, risk, and dependencies.
+4. Ensuring the Product Backlog is transparent, visible, and understood — everyone working on or with the product can see what's coming.
 
 The PO may delegate the doing of any of these. What they cannot delegate is the accountability. If the Product Backlog is a mess, that's on the PO, even if someone else wrote the items.`,
         example: {
@@ -193,17 +193,17 @@ A team can double its velocity by loosening the Definition of Done. Same feature
 
 A team can halve its velocity by working on a hard research spike that unlocks a huge subsequent capability. Velocity down, value up.
 
-The exam will test this. Any question that frames "increasing velocity" as a PO goal is probably a trap. The PO optimizes for value â customer satisfaction, revenue impact, adoption, cost reduction â whichever dimension actually drives the product forward.`
+The exam will test this. Any question that frames "increasing velocity" as a PO goal is probably a trap. The PO optimizes for value — customer satisfaction, revenue impact, adoption, cost reduction — whichever dimension actually drives the product forward.`
       },
       {
         heading: 'Not a Project Manager. Not a Requirements Collector.',
         body: `The PO is frequently confused with two older roles: Project Manager and Business Analyst. Understanding the differences is critical.
 
-A Project Manager owns schedule, scope, and budget â the triple constraint. They optimize for delivering a defined thing by a defined date.
+A Project Manager owns schedule, scope, and budget — the triple constraint. They optimize for delivering a defined thing by a defined date.
 
 A Business Analyst gathers requirements from stakeholders and translates them into specs. They're a conduit between business and development.
 
-The PO is neither. They own value. They can kill features that would hit the schedule but not deliver. They can change direction based on learning. They can say no to stakeholders whose requests don't align with the Product Goal. The PO has authority over what the product becomes â and the accountability for whether it works.`
+The PO is neither. They own value. They can kill features that would hit the schedule but not deliver. They can change direction based on learning. They can say no to stakeholders whose requests don't align with the Product Goal. The PO has authority over what the product becomes — and the accountability for whether it works.`
       }
     ],
     mnemonics: [
@@ -213,9 +213,9 @@ The PO is neither. They own value. They can kill features that would hit the sch
     tips: [
       'When a question lists "delegation" as a PO action, remember: they delegate the work, never the accountability.',
       'The PO does NOT write the Definition of Done, estimate items, or own the Sprint Backlog. These are common distractor answers.',
-      'The PO must attend the Sprint Retrospective â they\'re a Scrum Team member. Daily Scrum attendance is only when they\'re actively working on Sprint Backlog items.',
+      'The PO must attend the Sprint Retrospective — they\'re a Scrum Team member. Daily Scrum attendance is only when they\'re actively working on Sprint Backlog items.',
       'Only the PO can cancel a Sprint, and only when the Sprint Goal becomes obsolete. Not when the team falls behind. Not when a stakeholder changes their mind.',
-      'For the PO to succeed, the organization must respect their decisions. If leadership routinely overrides the PO, that\'s an organizational impediment â not a PO failure.'
+      'For the PO to succeed, the organization must respect their decisions. If leadership routinely overrides the PO, that\'s an organizational impediment — not a PO failure.'
     ],
     keyPoints: [
       'Develops and explicitly communicates the Product Goal.',
@@ -226,23 +226,23 @@ The PO is neither. They own value. They can kill features that would hit the sch
       'For the PO to succeed, the entire organization must respect their decisions.'
     ],
     traps: [
-      'The PO does NOT own the Definition of Done â the Scrum Team does, or the organization provides it.',
-      'The PO does NOT estimate Product Backlog items â the Developers do.',
-      'Value â  velocity. Velocity increases never indicate product value increases.',
+      'The PO does NOT own the Definition of Done — the Scrum Team does, or the organization provides it.',
+      'The PO does NOT estimate Product Backlog items — the Developers do.',
+      'Value ≠ velocity. Velocity increases never indicate product value increases.',
       'Not a Project Manager. No authority to assign tasks, track hours, or manage Developers.',
       'Required to attend the Sprint Retrospective (as a Scrum Team member).'
     ]
   },
   scrum_master: {
-    intro: `The Scrum Master is the accountability people most often get wrong in practice. Half the organizations that adopt Scrum hire Scrum Masters who function like Project Managers or team secretaries â scheduling meetings, tracking tasks, reporting status. None of that is the job. The real Scrum Master is a coach, a teacher, and a patient remover of obstacles who often works in the background.`,
+    intro: `The Scrum Master is the accountability people most often get wrong in practice. Half the organizations that adopt Scrum hire Scrum Masters who function like Project Managers or team secretaries — scheduling meetings, tracking tasks, reporting status. None of that is the job. The real Scrum Master is a coach, a teacher, and a patient remover of obstacles who often works in the background.`,
     sections: [
       {
         heading: 'True leader who serves',
-        body: `The 2020 Scrum Guide uses a specific phrase: "true leaders who serve." This is Robert Greenleaf's servant leadership reframed for Scrum â leadership exercised through enabling others, not through commanding them.
+        body: `The 2020 Scrum Guide uses a specific phrase: "true leaders who serve." This is Robert Greenleaf's servant leadership reframed for Scrum — leadership exercised through enabling others, not through commanding them.
 
 A Scrum Master doesn't assign work. They help the team self-manage well. They don't run Scrum events. They ensure events happen, are useful, and stay within timebox. They don't decide priorities. They coach the PO on techniques for doing that well.
 
-The accountability is: establishing Scrum and the Scrum Team's effectiveness. Both parts matter. Establishing Scrum means teaching the framework, defending it from erosion, helping the organization understand it. Team effectiveness means the team actually improves over time â not just follows ceremonies.`
+The accountability is: establishing Scrum and the Scrum Team's effectiveness. Both parts matter. Establishing Scrum means teaching the framework, defending it from erosion, helping the organization understand it. Team effectiveness means the team actually improves over time — not just follows ceremonies.`
       },
       {
         heading: 'Three directions of service',
@@ -254,11 +254,11 @@ Serving the Product Owner: finding techniques for effective Product Goal definit
 
 Serving the organization: leading, training, and coaching in Scrum adoption. Planning and advising Scrum implementations. Helping employees and stakeholders understand and enact an empirical approach.
 
-These three directions are equal. A Scrum Master who only serves the team â ignoring organizational impediments, leaving the PO to struggle â is only doing a third of the job.`
+These three directions are equal. A Scrum Master who only serves the team — ignoring organizational impediments, leaving the PO to struggle — is only doing a third of the job.`
       },
       {
         heading: 'What a good Scrum Master day looks like',
-        body: `Early morning: Scrum Master notices the team's Daily Scrum has drifted into status reporting for three days running. Jots a note to raise it at the Retrospective â not to correct it directly, but to help the team notice and choose.
+        body: `Early morning: Scrum Master notices the team's Daily Scrum has drifted into status reporting for three days running. Jots a note to raise it at the Retrospective — not to correct it directly, but to help the team notice and choose.
 
 Mid-morning: catches the PO struggling with stakeholder pressure to cram more into the Sprint. Has a 15-minute one-on-one, not to argue against the stakeholders, but to help the PO articulate the value trade-off.
 
@@ -269,7 +269,7 @@ Afternoon: facilitates a working session where the Developers are deciding how t
 Late afternoon: a Developer mentions a recurring tooling problem that costs the team an hour each Sprint. Scrum Master takes it as an impediment, spends the next day working on getting the team access to a better tool.`,
         example: {
           title: 'What a bad Scrum Master day looks like',
-          body: `Scrum Master runs the Daily Scrum â dictating who speaks when, asking each Developer the "three questions," and flagging items for the Product Owner.
+          body: `Scrum Master runs the Daily Scrum — dictating who speaks when, asking each Developer the "three questions," and flagging items for the Product Owner.
 
 They send weekly status reports to management with per-Developer task completion.
 
@@ -284,23 +284,23 @@ Every one of these behaviors violates Scrum. The Scrum Master isn't there to run
         heading: 'What the Scrum Master cannot do',
         body: `Some boundaries are sharp. The Scrum Master cannot:
 
-Cancel a Sprint â only the Product Owner can, and only when the Sprint Goal becomes obsolete.
-Assign work to Developers â that's self-management territory.
-Own the Sprint Backlog â the Developers own it.
-Modify the Product Backlog â that's the PO's accountability.
-Decide which Scrum events the team will use â all events are required by the framework.
+Cancel a Sprint — only the Product Owner can, and only when the Sprint Goal becomes obsolete.
+Assign work to Developers — that's self-management territory.
+Own the Sprint Backlog — the Developers own it.
+Modify the Product Backlog — that's the PO's accountability.
+Decide which Scrum events the team will use — all events are required by the framework.
 
 The Scrum Master's authority comes from coaching, teaching, and facilitating, not from positional power over any artifact or decision.`
       }
     ],
     mnemonics: [
-      { label: 'Team Â· PO Â· Org', text: 'The three directions of service. Always all three â not just the team.' },
+      { label: 'Team · PO · Org', text: 'The three directions of service. Always all three — not just the team.' },
       { label: 'Facilitate, don\'t run', text: 'The Scrum Master ensures events happen; they do not run them.' }
     ],
     tips: [
       'If a question describes the Scrum Master scheduling meetings, writing status reports, or assigning tasks, it\'s testing whether you recognize the Project Manager anti-pattern.',
       'The Scrum Master is not required to attend the Daily Scrum. Only Developers are. The SM may attend if asked to facilitate.',
-      'When a question asks "what should the SM do about X," the answer usually involves coaching, teaching, or facilitating â rarely taking direct action or issuing directives.',
+      'When a question asks "what should the SM do about X," the answer usually involves coaching, teaching, or facilitating — rarely taking direct action or issuing directives.',
       'The Scrum Master serves the organization too. Questions involving external stakeholders or managers often have "coach them on Scrum" as the correct answer.'
     ],
     keyPoints: [
@@ -312,32 +312,32 @@ The Scrum Master's authority comes from coaching, teaching, and facilitating, no
     traps: [
       'The Scrum Master is NOT a Project Manager, manager of the team, or administrative assistant.',
       'The Scrum Master does NOT assign tasks, run the Daily Scrum, or own the Sprint Backlog.',
-      'Only the PO can cancel a Sprint â the Scrum Master cannot.',
+      'Only the PO can cancel a Sprint — the Scrum Master cannot.',
       'Attendance at Daily Scrum is not required for the SM; only Developers are required.'
     ]
   },
   developers: {
-    intro: `In the 2020 Scrum Guide, the old "Development Team" became "the Developers" â and all internal sub-titles (Tester, Architect, Business Analyst, Designer) disappeared. This wasn't a cosmetic change. It was a deliberate push against the anti-pattern where teams silo by specialty inside a single Scrum Team, creating mini-dependencies that destroy cross-functionality.`,
+    intro: `In the 2020 Scrum Guide, the old "Development Team" became "the Developers" — and all internal sub-titles (Tester, Architect, Business Analyst, Designer) disappeared. This wasn't a cosmetic change. It was a deliberate push against the anti-pattern where teams silo by specialty inside a single Scrum Team, creating mini-dependencies that destroy cross-functionality.`,
     sections: [
       {
         heading: 'Who the Developers are',
         body: `Developers are the people committed to creating any aspect of a usable Increment each Sprint. "Any aspect" is the key phrase. A UX designer on a Scrum Team is a Developer. A database person is a Developer. A person running automated tests is a Developer. They all contribute to the Increment.
 
-The 2020 change matters because the old language â "Development Team" â subtly excluded the PO and SM from "the team" in people's minds, even though the Scrum Guide always said otherwise. And the old sub-titles encouraged people to say things like "that's not my job, I'm the Tester" â which is exactly what cross-functionality is supposed to prevent.`
+The 2020 change matters because the old language — "Development Team" — subtly excluded the PO and SM from "the team" in people's minds, even though the Scrum Guide always said otherwise. And the old sub-titles encouraged people to say things like "that's not my job, I'm the Tester" — which is exactly what cross-functionality is supposed to prevent.`
       },
       {
         heading: 'What Developers own',
         body: `Developers are accountable for:
 
-Creating a plan for the Sprint â the Sprint Backlog. They decide what work to select and how to structure it.
+Creating a plan for the Sprint — the Sprint Backlog. They decide what work to select and how to structure it.
 Instilling quality by adhering to the Definition of Done. Quality is a Developer responsibility, embedded in their work, not outsourced to a separate QA team.
-Adapting their plan each day toward the Sprint Goal. The Sprint Backlog is not a static contract â it evolves as the Developers learn.
+Adapting their plan each day toward the Sprint Goal. The Sprint Backlog is not a static contract — it evolves as the Developers learn.
 Holding each other accountable as professionals. Peer accountability, not managerial oversight.
 
 Notice: no one assigns tasks to Developers. Not the SM, not the PO, not a manager. Developers select, plan, and execute the work themselves.`,
         example: {
           title: 'The no-tester team',
-          body: `A team used to have a dedicated Tester. Under Scrum, the Tester is now a Developer â same person, different framing. On Monday they still mostly test. But on Tuesday, a story needs backend work and the two backend Developers are blocked. The former Tester pairs with one of them to help unblock, and writes automated integration tests alongside the code.
+          body: `A team used to have a dedicated Tester. Under Scrum, the Tester is now a Developer — same person, different framing. On Monday they still mostly test. But on Tuesday, a story needs backend work and the two backend Developers are blocked. The former Tester pairs with one of them to help unblock, and writes automated integration tests alongside the code.
 
 That's cross-functionality in action. The former Tester isn't suddenly a full-stack backend engineer, but the team collectively has the skills to get unstuck without waiting.`
         }
@@ -348,51 +348,51 @@ That's cross-functionality in action. The former Tester isn't suddenly a full-st
 
 Who picks up which item during Sprint Planning is a team decision, not a PO assignment.
 How the work gets broken down into tasks is the Developers' call, not something imposed from outside.
-What the Daily Scrum looks like â the format, who starts, what gets discussed â is the Developers' decision, within the 15-minute timebox and the inspect-and-adapt purpose.
+What the Daily Scrum looks like — the format, who starts, what gets discussed — is the Developers' decision, within the 15-minute timebox and the inspect-and-adapt purpose.
 When a Developer is stuck or struggling, the team figures out how to help. No one gets assigned "help Alice" by a manager.
-If a Developer is disrupting team effectiveness, the Scrum Team â not the Scrum Master alone â handles it.
+If a Developer is disrupting team effectiveness, the Scrum Team — not the Scrum Master alone — handles it.
 
 The team is a unit. Its decisions come from within.`
       },
       {
         heading: 'Sustainable pace',
-        body: `The Agile Manifesto â which Scrum predates but aligns with â says agile processes promote sustainable development at a constant pace indefinitely. Scrum itself doesn't prescribe hours, but the underlying principle is: don't burn out.
+        body: `The Agile Manifesto — which Scrum predates but aligns with — says agile processes promote sustainable development at a constant pace indefinitely. Scrum itself doesn't prescribe hours, but the underlying principle is: don't burn out.
 
 If your team is consistently working 60-hour weeks to meet Sprint forecasts, you're either forecasting too much or using velocity as pressure. Both are anti-patterns. A team that averages 40 productive hours for a year outproduces one that burns at 60 hours for two months and then falls apart.`
       }
     ],
     mnemonics: [
-      { label: 'Plan Â· Quality Â· Adapt Â· Peer', text: 'The four Developer accountabilities from the Scrum Guide.' },
-      { label: 'No titles', text: 'Tester, Architect, Designer, BA â all are Developers. Say it enough that the exam traps stop fooling you.' }
+      { label: 'Plan · Quality · Adapt · Peer', text: 'The four Developer accountabilities from the Scrum Guide.' },
+      { label: 'No titles', text: 'Tester, Architect, Designer, BA — all are Developers. Say it enough that the exam traps stop fooling you.' }
     ],
     tips: [
       'If an exam question mentions a "Tester" or "QA" on a Scrum Team, it\'s testing whether you know those aren\'t Scrum roles. All are Developers.',
       'Who estimates? The Developers. Who selects items for the Sprint? The Developers (in collaboration with the PO). Who owns the Sprint Backlog? The Developers. If in doubt, it\'s usually the Developers for anything about execution.',
       'Only the Developers are required at the Daily Scrum. Not the SM, not the PO (unless they\'re actively working on a Sprint Backlog item).',
-      'A Developer struggling with an item should collaborate â first with the PO for clarification, then with fellow Developers. Escalating to the Scrum Master is usually wrong.'
+      'A Developer struggling with an item should collaborate — first with the PO for clarification, then with fellow Developers. Escalating to the Scrum Master is usually wrong.'
     ],
     keyPoints: [
-      '"Developers" is the 2020 term â no more "Development Team," no sub-titles like Tester, Architect, etc.',
+      '"Developers" is the 2020 term — no more "Development Team," no sub-titles like Tester, Architect, etc.',
       'The Developers select Product Backlog items for the Sprint.',
       'The Developers create and own the Sprint Backlog.',
       'The Developers estimate Product Backlog items.'
     ],
     traps: [
       'There is no "Tester" or "QA" role in Scrum. Testing is a skill the team collectively needs.',
-      'Developers are self-managing â no one (not SM, not PO) assigns them tasks.',
+      'Developers are self-managing — no one (not SM, not PO) assigns them tasks.',
       'If a Developer is disrupting the team, the Scrum Team handles it. Not the Scrum Master alone.'
     ]
   },
   product_backlog: {
-    intro: `If the Product Owner is Scrum's most misunderstood role, the Product Backlog is its most misunderstood artifact. People imagine a giant requirements document, a signed-off scope list, or a static roadmap. It's none of those. The Product Backlog is a living, ordered, emergent list â and the word "emergent" is doing most of the work.`,
+    intro: `If the Product Owner is Scrum's most misunderstood role, the Product Backlog is its most misunderstood artifact. People imagine a giant requirements document, a signed-off scope list, or a static roadmap. It's none of those. The Product Backlog is a living, ordered, emergent list — and the word "emergent" is doing most of the work.`,
     sections: [
       {
         heading: 'Emergent and ordered',
         body: `The Scrum Guide's definition: the Product Backlog is an emergent, ordered list of what is needed to improve the product. Both adjectives matter.
 
-Emergent: the Backlog evolves as the team and organization learn. A new user pain point surfaces in research â new item. A security risk is discovered â new item. An assumption was wrong â affected items change or disappear. The Backlog is never "complete" and is never frozen.
+Emergent: the Backlog evolves as the team and organization learn. A new user pain point surfaces in research → new item. A security risk is discovered → new item. An assumption was wrong → affected items change or disappear. The Backlog is never "complete" and is never frozen.
 
-Ordered: the items are in a deliberate sequence. Not prioritized (priorities allow ties). Not categorized (categories don't produce sequence). Ordered â there is a first, a second, a third. The PO is accountable for that sequence.
+Ordered: the items are in a deliberate sequence. Not prioritized (priorities allow ties). Not categorized (categories don't produce sequence). Ordered — there is a first, a second, a third. The PO is accountable for that sequence.
 
 The Backlog is also the single source of work for the Scrum Team. Anything the team is working on that isn't in the Backlog is a transparency problem.`
       },
@@ -400,19 +400,19 @@ The Backlog is also the single source of work for the Scrum Team. Anything the t
         heading: 'What\'s in an item',
         body: `The 2020 Scrum Guide names three attributes for Product Backlog items:
 
-Description â what is this and why does it matter?
-Order â where does it sit relative to other items?
-Size â how big is it? This is what the Developers estimate.
+Description — what is this and why does it matter?
+Order — where does it sit relative to other items?
+Size — how big is it? This is what the Developers estimate.
 
-Teams often add more â value, acceptance criteria, links, owner, etc. â but those are team techniques, not Scrum requirements. The Scrum Guide does not prescribe user stories, acceptance criteria, story points, MoSCoW priorities, T-shirt sizing, or any other specific technique. Teams use these because they work â not because Scrum requires them.
+Teams often add more — value, acceptance criteria, links, owner, etc. — but those are team techniques, not Scrum requirements. The Scrum Guide does not prescribe user stories, acceptance criteria, story points, MoSCoW priorities, T-shirt sizing, or any other specific technique. Teams use these because they work — not because Scrum requires them.
 
-A concrete item might be one paragraph or a detailed document. Higher-order items (near the top) are smaller and clearer. Lower-order items (near the bottom) are larger and vaguer. That's fine. Detailing something you won't start for six months is usually wasted effort â you'll learn things between now and then that change it.`
+A concrete item might be one paragraph or a detailed document. Higher-order items (near the top) are smaller and clearer. Lower-order items (near the bottom) are larger and vaguer. That's fine. Detailing something you won't start for six months is usually wasted effort — you'll learn things between now and then that change it.`
       },
       {
         heading: 'Refinement: the gradient',
-        body: `Refinement is the act of adding detail, order, and size to Backlog items â usually making them smaller and clearer as they move toward the top. It's an ongoing activity, not a formal event. The 2020 Scrum Guide doesn't prescribe a specific time budget for it.
+        body: `Refinement is the act of adding detail, order, and size to Backlog items — usually making them smaller and clearer as they move toward the top. It's an ongoing activity, not a formal event. The 2020 Scrum Guide doesn't prescribe a specific time budget for it.
 
-Refinement happens inside the Sprint. The whole Scrum Team can participate â Developers often estimate and split items, the PO clarifies intent and ordering, the SM facilitates when useful.
+Refinement happens inside the Sprint. The whole Scrum Team can participate — Developers often estimate and split items, the PO clarifies intent and ordering, the SM facilitates when useful.
 
 There is no such thing as a "Definition of Ready" in the Scrum Guide. Some teams use one as a technique to avoid pulling half-baked items into a Sprint. Fine, if it works. But don't let it become a gate that blocks collaboration or justifies PO/Developer silos.`,
         example: {
@@ -423,25 +423,25 @@ Items for next week are vaguer: "something for the kids' lunches."
 
 Items for a month from now are barely there: "restock pantry staples."
 
-A Product Backlog is similar. The top is sharp and small. The bottom is fuzzy and big. As items approach the top, they get refined â broken up, detailed, estimated. Detailing the bottom of the list is mostly wasted work.`
+A Product Backlog is similar. The top is sharp and small. The bottom is fuzzy and big. As items approach the top, they get refined — broken up, detailed, estimated. Detailing the bottom of the list is mostly wasted work.`
         }
       },
       {
-        heading: 'Ordering â the PO\'s judgment call',
+        heading: 'Ordering — the PO\'s judgment call',
         body: `The Scrum Guide lists example factors for ordering: value, risk, priority, dependencies. That list is not exhaustive. The PO orders based on whatever best helps the team achieve the Product Goal and maximize value.
 
 Common factors in practice:
-Value â expected impact on users or business metrics.
-Risk â items that resolve big unknowns early are often pulled up, even if their direct value is modest.
-Dependencies â an item that blocks several others may need to come first even when its own value is low.
-Cost â among items of similar value, cheaper ones often go first.
-Learning potential â items that validate an important assumption can be worth prioritizing.
+Value — expected impact on users or business metrics.
+Risk — items that resolve big unknowns early are often pulled up, even if their direct value is modest.
+Dependencies — an item that blocks several others may need to come first even when its own value is low.
+Cost — among items of similar value, cheaper ones often go first.
+Learning potential — items that validate an important assumption can be worth prioritizing.
 
 There's no formula. There's no universal "correct" order. Ordering is the PO's professional judgment, exercised continuously as new information arrives.`
       }
     ],
     mnemonics: [
-      { label: 'D.O.S.', text: 'Description, Order, Size â the three PBI attributes the 2020 Scrum Guide names. Teams often add more (value, acceptance criteria) as a technique; only these three are in the Guide.' },
+      { label: 'D.O.S.', text: 'Description, Order, Size — the three PBI attributes the 2020 Scrum Guide names. Teams often add more (value, acceptance criteria) as a technique; only these three are in the Guide.' },
       { label: '1 product = 1 Backlog', text: 'No matter how many teams. No "per-team backlog" ever exists in Scrum.' }
     ],
     tips: [
@@ -449,7 +449,7 @@ There's no formula. There's no universal "correct" order. Ordering is the PO's p
       'The Product Backlog is never baselined. If a question implies a frozen or approved Backlog, something is wrong in that framing.',
       'Ordering is a PO decision, delegable but not transferable in accountability. If Developers or stakeholders "decide the order," it\'s a trap.',
       'There is no Sprint 0 for "building the initial Backlog." The Backlog exists as soon as anyone starts thinking about the product; a first Sprint starts when there\'s enough at the top to plan from.',
-      'All product work â features, fixes, non-functional requirements, documentation â belongs on the one Product Backlog. Separate backlogs for "technical" or "bug" work destroy transparency.'
+      'All product work — features, fixes, non-functional requirements, documentation — belongs on the one Product Backlog. Separate backlogs for "technical" or "bug" work destroy transparency.'
     ],
     keyPoints: [
       'Attributes of a Product Backlog item per the 2020 Scrum Guide: description, order, and size.',
@@ -461,21 +461,21 @@ There's no formula. There's no universal "correct" order. Ordering is the PO's p
     traps: [
       'One product = one Product Backlog, even with multiple teams.',
       'There is no "Definition of Ready" in the 2020 Scrum Guide.',
-      'The Product Backlog is NEVER baselined â it\'s always evolving.',
-      'Value points, story points, MoSCoW â none of these are prescribed by Scrum.',
+      'The Product Backlog is NEVER baselined — it\'s always evolving.',
+      'Value points, story points, MoSCoW — none of these are prescribed by Scrum.',
       'A first Sprint can start before the Product Backlog is "complete." It never will be.'
     ]
   },
   sprint_backlog: {
-    intro: `The Sprint Backlog is often described as "the Developers' to-do list for the Sprint." That's close but misses the structure. The Sprint Backlog has three deliberate parts â why, what, and how â and understanding all three is essential for the exam and for real practice.`,
+    intro: `The Sprint Backlog is often described as "the Developers' to-do list for the Sprint." That's close but misses the structure. The Sprint Backlog has three deliberate parts — why, what, and how — and understanding all three is essential for the exam and for real practice.`,
     sections: [
       {
         heading: 'The three parts',
         body: `The Sprint Backlog is composed of:
 
-Sprint Goal â the single objective for the Sprint. The why. Crafted during Sprint Planning. The Sprint's commitment.
-Selected Product Backlog items â what the Developers forecast they can deliver this Sprint.
-An actionable plan for delivering the Increment â the how. Usually visible as tasks, sub-items, or a board of work.
+Sprint Goal — the single objective for the Sprint. The why. Crafted during Sprint Planning. The Sprint's commitment.
+Selected Product Backlog items — what the Developers forecast they can deliver this Sprint.
+An actionable plan for delivering the Increment — the how. Usually visible as tasks, sub-items, or a board of work.
 
 All three matter. The Sprint Goal keeps the team focused when scope needs to flex. The selected items anchor the forecast. The plan makes the work visible and adaptable.`
       },
@@ -483,7 +483,7 @@ All three matter. The Sprint Goal keeps the team focused when scope needs to fle
         heading: 'Owned by the Developers',
         body: `The Sprint Backlog belongs to the Developers. They create it. They update it. They decide how to structure it. The PO doesn't control it. The Scrum Master doesn't own it. Managers can't modify it.
 
-If something needs to change mid-Sprint â an item is bigger than expected, a dependency emerges, new learning arrives â the Developers renegotiate scope with the PO through collaboration. This is not scope creep. This is how empiricism is supposed to work.
+If something needs to change mid-Sprint — an item is bigger than expected, a dependency emerges, new learning arrives — the Developers renegotiate scope with the PO through collaboration. This is not scope creep. This is how empiricism is supposed to work.
 
 What the Developers cannot do unilaterally: change the Sprint Goal, remove scope that would defeat the Goal, or alter the Definition of Done mid-Sprint.`
       },
@@ -493,7 +493,7 @@ What the Developers cannot do unilaterally: change the Sprint Goal, remove scope
 
 As the Sprint progresses, the plan evolves. New tasks emerge as the Developers learn. Work gets broken down further. Dead-end approaches get abandoned. This is all normal.
 
-The Daily Scrum is partly for this: the Developers inspect progress toward the Sprint Goal and adapt the Sprint Backlog. If day 3 reveals a task that's ten times bigger than expected, the plan changes â and possibly, the scope discussion with the PO begins.`,
+The Daily Scrum is partly for this: the Developers inspect progress toward the Sprint Goal and adapt the Sprint Backlog. If day 3 reveals a task that's ten times bigger than expected, the plan changes — and possibly, the scope discussion with the PO begins.`,
         example: {
           title: 'A real Sprint\'s arc',
           body: `Sprint Planning, day 1. Team forecasts 8 items, sets a Sprint Goal ("enable self-service password reset for customers"). Sprint Backlog has the 8 items and a rough plan breaking each into 2-4 tasks.
@@ -502,7 +502,7 @@ Day 3, Daily Scrum. Developers realize item #5 depends on a third-party API that
 
 Day 7, Daily Scrum. Item #2 turned out simpler than expected; Developers pull in an extra from the Backlog.
 
-Day 10 (Sprint end). Eight items done, goal met, one swapped-in bonus also done. Sprint Backlog looks nothing like what it did on day 1 â and that's exactly right.`
+Day 10 (Sprint end). Eight items done, goal met, one swapped-in bonus also done. Sprint Backlog looks nothing like what it did on day 1 — and that's exactly right.`
         }
       },
       {
@@ -513,12 +513,12 @@ The principle is unchanged: continuous improvement is work. If improvements aren
       }
     ],
     mnemonics: [
-      { label: 'Why Â· What Â· How', text: 'The Sprint Goal (why), selected items (what), plan (how). All three together = the Sprint Backlog.' }
+      { label: 'Why · What · How', text: 'The Sprint Goal (why), selected items (what), plan (how). All three together = the Sprint Backlog.' }
     ],
     tips: [
       'The Sprint Backlog is owned by the Developers. Not the Scrum Team, not the PO. Just the Developers. This distinction shows up on the exam.',
       'Scope can be renegotiated with the PO mid-Sprint. The Sprint Goal cannot (except for Sprint cancellation, which only the PO can trigger).',
-      'The Sprint Backlog is not fully defined at Sprint Planning â enough to start, not everything.',
+      'The Sprint Backlog is not fully defined at Sprint Planning — enough to start, not everything.',
       'If a question frames the Sprint Backlog as a frozen commitment that can\'t change, that\'s the wrong framing.'
     ],
     keyPoints: [
@@ -528,30 +528,30 @@ The principle is unchanged: continuous improvement is work. If improvements aren
     ],
     traps: [
       'The PO does not own and cannot modify the Sprint Backlog. Scope renegotiation with the PO is done through collaboration, not unilateral action.',
-      'The Sprint Backlog is not fully defined at Sprint Planning â it emerges.',
-      'Scope may be clarified and renegotiated with the PO as more is learned. This is not scope creep â it\'s adaptation.'
+      'The Sprint Backlog is not fully defined at Sprint Planning — it emerges.',
+      'Scope may be clarified and renegotiated with the PO as more is learned. This is not scope creep — it\'s adaptation.'
     ]
   },
   events: {
-    intro: `Scrum has five events. Understanding each event's purpose â not just its name or timebox â is the difference between doing Scrum and ritualizing it. Every event exists to inspect or adapt something. Skip the purpose and you're left with ceremony.`,
+    intro: `Scrum has five events. Understanding each event's purpose — not just its name or timebox — is the difference between doing Scrum and ritualizing it. Every event exists to inspect or adapt something. Skip the purpose and you're left with ceremony.`,
     sections: [
       {
         heading: 'The Sprint: the container',
-        body: `The Sprint is the heartbeat of Scrum and contains all other events. It's one month or less, fixed length, with a Sprint Goal. A new Sprint starts immediately after the previous one concludes â there's no gap, no "Sprint break," no planning week between.
+        body: `The Sprint is the heartbeat of Scrum and contains all other events. It's one month or less, fixed length, with a Sprint Goal. A new Sprint starts immediately after the previous one concludes — there's no gap, no "Sprint break," no planning week between.
 
-The Sprint's purpose: create a usable Increment. Every Sprint must produce at least one Increment meeting the Definition of Done. Multiple Increments in a Sprint are allowed (and often healthy â release when ready, not when the Sprint is over).
+The Sprint's purpose: create a usable Increment. Every Sprint must produce at least one Increment meeting the Definition of Done. Multiple Increments in a Sprint are allowed (and often healthy — release when ready, not when the Sprint is over).
 
 Only the Product Owner can cancel a Sprint, and only when the Sprint Goal becomes obsolete. Falling behind doesn't qualify. A stakeholder changing their mind doesn't qualify. Only: "the goal we set no longer makes sense."`
       },
       {
-        heading: 'Sprint Planning: Why â What â How',
+        heading: 'Sprint Planning: Why → What → How',
         body: `Max 8 hours for a one-month Sprint. Proportionally less for shorter Sprints (2h for a one-week Sprint is typical).
 
 Sprint Planning answers three questions in order:
 
 Why is this Sprint valuable? The Scrum Team discusses the Product Goal and agrees on a Sprint Goal that serves it. This is the Sprint's single objective.
 What can be Done this Sprint? The Developers, in collaboration with the PO, select Product Backlog items they can realistically complete given the Sprint Goal and their capacity.
-How will the work be done? The Developers break down selected items into a plan â tasks, design decisions, who will pair with whom. This part often continues past the event boundary as more emerges.
+How will the work be done? The Developers break down selected items into a plan — tasks, design decisions, who will pair with whom. This part often continues past the event boundary as more emerges.
 
 Notice: the Sprint Goal is crafted during Sprint Planning, not brought into it. The PO comes in with business context and priorities; the Sprint Goal is co-created.`
       },
@@ -569,13 +569,13 @@ If the Daily Scrum has drifted into round-robin status updates, that's a Retrosp
         heading: 'Sprint Review: not a demo, not a gate',
         body: `Max 4 hours for a one-month Sprint. The Scrum Team meets with stakeholders to inspect the Increment and discuss what to do next.
 
-Common misconception: the Sprint Review is a "demo" or "formal approval meeting." It isn't. The Scrum Guide explicitly describes it as a working session. The Increment is inspected. Stakeholders provide feedback. The Product Backlog is adapted based on what was learned â new items appear, existing items change or disappear.
+Common misconception: the Sprint Review is a "demo" or "formal approval meeting." It isn't. The Scrum Guide explicitly describes it as a working session. The Increment is inspected. Stakeholders provide feedback. The Product Backlog is adapted based on what was learned — new items appear, existing items change or disappear.
 
-Who attends: the Scrum Team, plus stakeholders invited by the Product Owner. The Scrum Guide doesn't dictate exactly who â the PO decides whom to invite to make the Review productive. In practice, invite stakeholders whose feedback matters for the next Sprint's work.`
+Who attends: the Scrum Team, plus stakeholders invited by the Product Owner. The Scrum Guide doesn't dictate exactly who — the PO decides whom to invite to make the Review productive. In practice, invite stakeholders whose feedback matters for the next Sprint's work.`
       },
       {
         heading: 'Sprint Retrospective: focus on the team',
-        body: `Max 3 hours for a one-month Sprint. The Scrum Team inspects itself â individuals, interactions, processes, tools, Definition of Done â and identifies improvements.
+        body: `Max 3 hours for a one-month Sprint. The Scrum Team inspects itself — individuals, interactions, processes, tools, Definition of Done — and identifies improvements.
 
 Where other events focus primarily on the product (Planning, Review) or the Sprint Backlog (Daily Scrum), the Retrospective centers on the team itself. What went well. What didn\'t. What to change. The Definition of Done is also inspected here, since it governs the Increment\'s quality.
 
@@ -584,10 +584,10 @@ Stakeholders aren\'t typically invited. The Retrospective is a safe space for th
 Outcomes should be actionable. At least one improvement item ideally moves into the next Sprint Backlog so the change actually gets worked on. If improvement items pile up without action, the Retrospective is failing.`
       }
     ],
-    visual: `<svg viewBox="0 0 640 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:640px;margin:0 auto;display:block"><defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e8a838"/></marker></defs><rect x="40" y="60" width="560" height="100" fill="none" stroke="#e8a838" stroke-width="1.5" opacity="0.6"/><text x="320" y="48" text-anchor="middle" fill="#e8a838" font-size="11" font-family="JetBrains Mono, monospace" letter-spacing="1.5">SPRINT (â¤ 1 MONTH)</text><rect x="50" y="70" width="60" height="40" fill="currentColor" opacity="0.15"/><text x="80" y="95" text-anchor="middle" fill="currentColor" font-size="10" font-family="JetBrains Mono, monospace">PLAN</text><text x="80" y="128" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.5" font-family="JetBrains Mono, monospace">â¤8h</text><line x1="130" y1="75" x2="130" y2="155" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.4"/><circle cx="180" cy="90" r="4" fill="#e8a838"/><circle cx="230" cy="90" r="4" fill="#e8a838"/><circle cx="280" cy="90" r="4" fill="#e8a838"/><circle cx="330" cy="90" r="4" fill="#e8a838"/><circle cx="380" cy="90" r="4" fill="#e8a838"/><circle cx="430" cy="90" r="4" fill="#e8a838"/><text x="305" y="128" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.55" font-family="JetBrains Mono, monospace">Daily Scrum Â· 15 min each</text><rect x="475" y="70" width="55" height="40" fill="currentColor" opacity="0.15"/><text x="502" y="95" text-anchor="middle" fill="currentColor" font-size="10" font-family="JetBrains Mono, monospace">REVIEW</text><text x="502" y="128" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.5" font-family="JetBrains Mono, monospace">â¤4h</text><rect x="535" y="70" width="55" height="40" fill="currentColor" opacity="0.15"/><text x="562" y="95" text-anchor="middle" fill="currentColor" font-size="10" font-family="JetBrains Mono, monospace">RETRO</text><text x="562" y="128" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.5" font-family="JetBrains Mono, monospace">â¤3h</text><path d="M 600 185 L 625 185 L 625 90 L 620 90" stroke="#e8a838" stroke-width="1.2" fill="none" stroke-dasharray="3 3" opacity="0.6" marker-end="url(#ar2)"/><text x="40" y="190" fill="currentColor" font-size="10" opacity="0.55" font-family="JetBrains Mono, monospace">GOAL:</text><text x="80" y="190" fill="currentColor" font-size="10" opacity="0.75" font-family="Fraunces, serif" font-style="italic">Produce at least one usable Increment meeting the DoD.</text><text x="40" y="210" fill="currentColor" font-size="9" opacity="0.45" font-family="JetBrains Mono, monospace">NEXT SPRINT: starts immediately after Retro. No gap.</text></svg>`,
+    visual: `<svg viewBox="0 0 640 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:640px;margin:0 auto;display:block"><defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e8a838"/></marker></defs><rect x="40" y="60" width="560" height="100" fill="none" stroke="#e8a838" stroke-width="1.5" opacity="0.6"/><text x="320" y="48" text-anchor="middle" fill="#e8a838" font-size="11" font-family="JetBrains Mono, monospace" letter-spacing="1.5">SPRINT (≤ 1 MONTH)</text><rect x="50" y="70" width="60" height="40" fill="currentColor" opacity="0.15"/><text x="80" y="95" text-anchor="middle" fill="currentColor" font-size="10" font-family="JetBrains Mono, monospace">PLAN</text><text x="80" y="128" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.5" font-family="JetBrains Mono, monospace">≤8h</text><line x1="130" y1="75" x2="130" y2="155" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.4"/><circle cx="180" cy="90" r="4" fill="#e8a838"/><circle cx="230" cy="90" r="4" fill="#e8a838"/><circle cx="280" cy="90" r="4" fill="#e8a838"/><circle cx="330" cy="90" r="4" fill="#e8a838"/><circle cx="380" cy="90" r="4" fill="#e8a838"/><circle cx="430" cy="90" r="4" fill="#e8a838"/><text x="305" y="128" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.55" font-family="JetBrains Mono, monospace">Daily Scrum · 15 min each</text><rect x="475" y="70" width="55" height="40" fill="currentColor" opacity="0.15"/><text x="502" y="95" text-anchor="middle" fill="currentColor" font-size="10" font-family="JetBrains Mono, monospace">REVIEW</text><text x="502" y="128" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.5" font-family="JetBrains Mono, monospace">≤4h</text><rect x="535" y="70" width="55" height="40" fill="currentColor" opacity="0.15"/><text x="562" y="95" text-anchor="middle" fill="currentColor" font-size="10" font-family="JetBrains Mono, monospace">RETRO</text><text x="562" y="128" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.5" font-family="JetBrains Mono, monospace">≤3h</text><path d="M 600 185 L 625 185 L 625 90 L 620 90" stroke="#e8a838" stroke-width="1.2" fill="none" stroke-dasharray="3 3" opacity="0.6" marker-end="url(#ar2)"/><text x="40" y="190" fill="currentColor" font-size="10" opacity="0.55" font-family="JetBrains Mono, monospace">GOAL:</text><text x="80" y="190" fill="currentColor" font-size="10" opacity="0.75" font-family="Fraunces, serif" font-style="italic">Produce at least one usable Increment meeting the DoD.</text><text x="40" y="210" fill="currentColor" font-size="9" opacity="0.45" font-family="JetBrains Mono, monospace">NEXT SPRINT: starts immediately after Retro. No gap.</text></svg>`,
     mnemonics: [
-      { label: '1 Â· 15 Â· 3 Â· 4 Â· 8', text: 'Max timeboxes for a one-month Sprint. Sprint = 1 month, Daily = 15 min, Retro = 3h, Review = 4h, Planning = 8h.' },
-      { label: 'Why Â· What Â· How', text: 'Sprint Planning, in that order.' },
+      { label: '1 · 15 · 3 · 4 · 8', text: 'Max timeboxes for a one-month Sprint. Sprint = 1 month, Daily = 15 min, Retro = 3h, Review = 4h, Planning = 8h.' },
+      { label: 'Why · What · How', text: 'Sprint Planning, in that order.' },
       { label: 'Inspect-adapt pairs', text: 'Daily Scrum inspects the Sprint Backlog. Sprint Review inspects the Increment. Retrospective inspects the team.' }
     ],
     tips: [
@@ -608,22 +608,22 @@ Outcomes should be actionable. At least one improvement item ideally moves into 
     ],
     traps: [
       'Daily Scrum has no mandated format. The "three questions" are no longer prescribed in the 2020 Scrum Guide.',
-      'The Sprint Review is not a "formal" demo or approval meeting â it\'s a working session.',
+      'The Sprint Review is not a "formal" demo or approval meeting — it\'s a working session.',
       'Stakeholders attend the Sprint Review (not the Retrospective, unless the team invites).',
       'No "Sprint 0." No "hardening Sprint." No "release Sprint." All Sprints produce Increments.',
       'Timeboxes are maximums, not targets. Shorter is fine.'
     ]
   },
   artifacts_commitments: {
-    intro: `The 2020 Scrum Guide introduced one of its most important changes: pairing each artifact with a commitment. Before 2020, artifacts existed somewhat abstractly. After 2020, each artifact has an anchor â a commitment that gives it purpose and direction. This pairing is exam-critical and conceptually central.`,
+    intro: `The 2020 Scrum Guide introduced one of its most important changes: pairing each artifact with a commitment. Before 2020, artifacts existed somewhat abstractly. After 2020, each artifact has an anchor — a commitment that gives it purpose and direction. This pairing is exam-critical and conceptually central.`,
     sections: [
       {
         heading: 'Three artifacts, three commitments',
         body: `Scrum has three artifacts: Product Backlog, Sprint Backlog, Increment. Each gets a commitment:
 
-Product Backlog â Product Goal. The long-term objective that unifies Sprints.
-Sprint Backlog â Sprint Goal. The single objective for one Sprint.
-Increment â Definition of Done. The quality standard that makes an Increment real.
+Product Backlog → Product Goal. The long-term objective that unifies Sprints.
+Sprint Backlog → Sprint Goal. The single objective for one Sprint.
+Increment → Definition of Done. The quality standard that makes an Increment real.
 
 Why pair them? Because an artifact without a commitment is just data. The Product Backlog without a Product Goal is a list of stuff. The Sprint Backlog without a Sprint Goal is a to-do list. The Increment without a Definition of Done is a claim.
 
@@ -633,13 +633,13 @@ Commitments are what make artifacts meaningful for inspection and adaptation. Yo
         heading: 'Product Goal',
         body: `The Product Goal is the Scrum Team's long-term objective. It describes a future state of the product worth aiming at. The Scrum Team focuses on one Product Goal at a time.
 
-It lives in the Product Backlog â it's not a separate artifact. The Product Backlog emerges to define what will fulfill the Product Goal.
+It lives in the Product Backlog — it's not a separate artifact. The Product Backlog emerges to define what will fulfill the Product Goal.
 
-When one Product Goal is achieved (or abandoned because the world changed), a new one is set. A Product Goal doesn't have to be "ship feature X" â it could be "reduce customer onboarding time to under five minutes" or "reach product-market fit in this segment."`
+When one Product Goal is achieved (or abandoned because the world changed), a new one is set. A Product Goal doesn't have to be "ship feature X" — it could be "reduce customer onboarding time to under five minutes" or "reach product-market fit in this segment."`
       },
       {
         heading: 'Sprint Goal',
-        body: `The Sprint Goal is the single objective for the Sprint. It's created during Sprint Planning by the Scrum Team. It gives coherence to the Sprint â a reason the selected items belong together.
+        body: `The Sprint Goal is the single objective for the Sprint. It's created during Sprint Planning by the Scrum Team. It gives coherence to the Sprint — a reason the selected items belong together.
 
 The Sprint Goal is committed. The selected Product Backlog items are forecast, not committed. This distinction is important: if during the Sprint the team learns that a different combination of items would better serve the Sprint Goal, they can renegotiate items with the PO. What doesn't change without Sprint cancellation: the Goal itself.
 
@@ -647,13 +647,13 @@ A good Sprint Goal is concrete enough that you can tell whether you've met it. "
       },
       {
         heading: 'Definition of Done',
-        body: `The Definition of Done is the quality standard for the Increment. An item isn't "done" because a Developer feels finished or a PO approves â it's done because it meets the DoD. This is how Scrum enforces quality as a contract, not a matter of opinion.
+        body: `The Definition of Done is the quality standard for the Increment. An item isn't "done" because a Developer feels finished or a PO approves — it's done because it meets the DoD. This is how Scrum enforces quality as a contract, not a matter of opinion.
 
 Who creates the DoD? The organization, if there is an organizational standard. Otherwise the Scrum Team creates one appropriate for the product. The team can add more stringent criteria to an organizational DoD but cannot loosen it.
 
 When multiple teams work on the same product, they share one Definition of Done. Otherwise Increments can't combine into a coherent whole.
 
-The DoD shouldn't change mid-Sprint â that would invalidate work already done under the old standard. Change it in the Retrospective.
+The DoD shouldn't change mid-Sprint — that would invalidate work already done under the old standard. Change it in the Retrospective.
 
 If an item doesn't meet the DoD at Sprint end, it's not part of the Increment. It goes back to the Product Backlog for the PO to decide what to do with it.`
       },
@@ -661,14 +661,14 @@ If an item doesn't meet the DoD at Sprint end, it's not part of the Increment. I
         heading: 'The Increment',
         body: `An Increment is a concrete stepping stone toward the Product Goal. Each Increment is additive to prior Increments, thoroughly verified, and usable. Multiple Increments may be created in a Sprint.
 
-"Usable" is strong language. The Increment must be in a state where the PO could release it â whether they actually release it is a separate decision.
+"Usable" is strong language. The Increment must be in a state where the PO could release it — whether they actually release it is a separate decision.
 
 The Sprint Review presents the Increment to stakeholders for inspection. But an Increment can be presented only if it meets the Definition of Done. This is why the DoD is structural, not optional.`
       }
     ],
     visual: `<svg viewBox="0 0 560 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;margin:0 auto;display:block"><defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e8a838"/></marker></defs><rect x="20" y="30" width="160" height="70" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.7"/><text x="100" y="60" text-anchor="middle" fill="currentColor" font-size="14" font-family="Fraunces, serif" font-weight="500">Product Backlog</text><text x="100" y="82" text-anchor="middle" fill="currentColor" font-size="10" opacity="0.55" font-family="JetBrains Mono, monospace">what can be done</text><path d="M 180 65 L 370 65" stroke="#e8a838" stroke-width="1.5" fill="none" marker-end="url(#ar3)" stroke-dasharray="4 3"/><text x="275" y="58" text-anchor="middle" fill="#e8a838" font-size="10" font-family="JetBrains Mono, monospace" letter-spacing="1.5">COMMITS TO</text><rect x="370" y="30" width="170" height="70" fill="none" stroke="#e8a838" stroke-width="1.5"/><text x="455" y="60" text-anchor="middle" fill="#e8a838" font-size="14" font-family="Fraunces, serif" font-weight="500">Product Goal</text><text x="455" y="82" text-anchor="middle" fill="#e8a838" font-size="10" opacity="0.75" font-family="JetBrains Mono, monospace">long-term direction</text><rect x="20" y="115" width="160" height="70" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.7"/><text x="100" y="145" text-anchor="middle" fill="currentColor" font-size="14" font-family="Fraunces, serif" font-weight="500">Sprint Backlog</text><text x="100" y="167" text-anchor="middle" fill="currentColor" font-size="10" opacity="0.55" font-family="JetBrains Mono, monospace">plan for this Sprint</text><path d="M 180 150 L 370 150" stroke="#e8a838" stroke-width="1.5" fill="none" marker-end="url(#ar3)" stroke-dasharray="4 3"/><text x="275" y="143" text-anchor="middle" fill="#e8a838" font-size="10" font-family="JetBrains Mono, monospace" letter-spacing="1.5">COMMITS TO</text><rect x="370" y="115" width="170" height="70" fill="none" stroke="#e8a838" stroke-width="1.5"/><text x="455" y="145" text-anchor="middle" fill="#e8a838" font-size="14" font-family="Fraunces, serif" font-weight="500">Sprint Goal</text><text x="455" y="167" text-anchor="middle" fill="#e8a838" font-size="10" opacity="0.75" font-family="JetBrains Mono, monospace">single Sprint objective</text><rect x="20" y="200" width="160" height="50" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.7"/><text x="100" y="222" text-anchor="middle" fill="currentColor" font-size="14" font-family="Fraunces, serif" font-weight="500">Increment</text><text x="100" y="240" text-anchor="middle" fill="currentColor" font-size="10" opacity="0.55" font-family="JetBrains Mono, monospace">usable result</text><path d="M 180 225 L 370 225" stroke="#e8a838" stroke-width="1.5" fill="none" marker-end="url(#ar3)" stroke-dasharray="4 3"/><text x="275" y="218" text-anchor="middle" fill="#e8a838" font-size="10" font-family="JetBrains Mono, monospace" letter-spacing="1.5">COMMITS TO</text><rect x="370" y="200" width="170" height="50" fill="none" stroke="#e8a838" stroke-width="1.5"/><text x="455" y="222" text-anchor="middle" fill="#e8a838" font-size="14" font-family="Fraunces, serif" font-weight="500">Definition of Done</text><text x="455" y="240" text-anchor="middle" fill="#e8a838" font-size="10" opacity="0.75" font-family="JetBrains Mono, monospace">quality floor</text></svg>`,
     mnemonics: [
-      { label: 'PBÂ·PG Â· SBÂ·SG Â· IÂ·DoD', text: 'Product Backlog + Product Goal. Sprint Backlog + Sprint Goal. Increment + Definition of Done.' },
+      { label: 'PB·PG · SB·SG · I·DoD', text: 'Product Backlog + Product Goal. Sprint Backlog + Sprint Goal. Increment + Definition of Done.' },
       { label: 'Committed vs Forecast', text: 'The Sprint GOAL is committed. The selected ITEMS are forecast. Items can flex; Goal cannot.' }
     ],
     tips: [
@@ -677,7 +677,7 @@ The Sprint Review presents the Increment to stakeholders for inspection. But an 
       'Multiple Increments can exist in a single Sprint. The 2020 Guide added this explicitly.',
       'The DoD belongs to the Scrum Team (or the organization). The PO does not own it.',
       'If an item doesn\'t meet the DoD, it\'s not Done. Back to the Product Backlog, no partial credit.',
-      'The DoD cannot be changed mid-Sprint â that would invalidate prior work. Retrospective is the place to adjust it.'
+      'The DoD cannot be changed mid-Sprint — that would invalidate prior work. Retrospective is the place to adjust it.'
     ],
     keyPoints: [
       'Product Goal: the long-term objective for the Scrum Team. One goal at a time. In the Product Backlog.',
@@ -686,29 +686,29 @@ The Sprint Review presents the Increment to stakeholders for inspection. But an 
       'An Increment is a concrete stepping stone toward the Product Goal. Each Increment is additive to prior Increments, thoroughly verified, and usable. Multiple Increments may be created in a Sprint.'
     ],
     traps: [
-      'The Sprint Goal is committed to by the Developers, but the PBIs selected are not â selection may be renegotiated.',
+      'The Sprint Goal is committed to by the Developers, but the PBIs selected are not — selection may be renegotiated.',
       'If the organization has a DoD, the Scrum Team must follow it as a minimum and can add more stringent criteria.',
-      'The Increment must meet the DoD â if it doesn\'t, it can\'t be released and can\'t be presented at Sprint Review.',
+      'The Increment must meet the DoD — if it doesn\'t, it can\'t be released and can\'t be presented at Sprint Review.',
       'The Product Goal lives in the Product Backlog. It\'s not a separate artifact.'
     ]
   },
   scaling: {
-    intro: `Scaling Scrum â running multiple Scrum Teams on one product â is where many organizations misapply the framework. The rules are simpler than people expect: scaling doesn't multiply the artifacts or accountabilities. It multiplies teams around one product, one backlog, one PO, one DoD. Understanding these invariants will handle almost every scaling question on the exam.`,
+    intro: `Scaling Scrum — running multiple Scrum Teams on one product — is where many organizations misapply the framework. The rules are simpler than people expect: scaling doesn't multiply the artifacts or accountabilities. It multiplies teams around one product, one backlog, one PO, one DoD. Understanding these invariants will handle almost every scaling question on the exam.`,
     sections: [
       {
         heading: 'The invariants',
         body: `When N Scrum Teams work on the same product, these remain singular:
 
-One Product Owner â regardless of team count.
-One Product Backlog â everything everyone is building for this product.
-One Product Goal â the shared long-term objective.
-One Definition of Done â otherwise Increments can't combine.
+One Product Owner — regardless of team count.
+One Product Backlog — everything everyone is building for this product.
+One Product Goal — the shared long-term objective.
+One Definition of Done — otherwise Increments can't combine.
 
 These remain per-team:
 
-N Sprint Backlogs â each team has its own plan.
-N Sprint Goals â each team commits to its own Sprint objective (ideally aligned with the Product Goal).
-1âN Scrum Masters â often one per team, but one person can serve multiple teams.
+N Sprint Backlogs — each team has its own plan.
+N Sprint Goals — each team commits to its own Sprint objective (ideally aligned with the Product Goal).
+1–N Scrum Masters — often one per team, but one person can serve multiple teams.
 
 Also: each Sprint, every team's work should integrate into a combined, usable Increment. If Team A's work and Team B's work can't merge and run together by end-of-Sprint, the "Increment" is a fiction.`
       },
@@ -716,70 +716,70 @@ Also: each Sprint, every team's work should integrate into a combined, usable In
         heading: 'Why not N Product Backlogs',
         body: `The temptation in scaling is to give each team its own mini-backlog: "Team A handles mobile, Team B handles backend, Team C handles payments." This seems tidy. It's an anti-pattern.
 
-Separate backlogs hide dependencies. When mobile needs something from backend, that request lives somewhere â either in Team A's backlog (invisible to Team B), Team B's backlog (disconnected from user value), or a shared spreadsheet nobody updates. All three fail transparency.
+Separate backlogs hide dependencies. When mobile needs something from backend, that request lives somewhere — either in Team A's backlog (invisible to Team B), Team B's backlog (disconnected from user value), or a shared spreadsheet nobody updates. All three fail transparency.
 
-One backlog exposes dependencies. When an item requires work from multiple teams, that's visible. The PO and the teams can structure the work to reduce those dependencies â which is the real goal.`,
+One backlog exposes dependencies. When an item requires work from multiple teams, that's visible. The PO and the teams can structure the work to reduce those dependencies — which is the real goal.`,
         example: {
           title: 'The six-team launch',
           body: `Six teams. One product. One PO. One Product Backlog.
 
 At PB refinement, teams notice that five Backlog items depend on a shared data service that only one team has touched. Instead of accepting the dependency, the teams propose restructuring: two items can be redesigned to not need the service, two others can be done by any team if they add some shared utilities first.
 
-That restructuring â breaking the work so teams can operate independently â is the correct response to multi-team dependencies. Not "assign a coordinator." Not "give each team its own backlog." Restructure the work.`
+That restructuring — breaking the work so teams can operate independently — is the correct response to multi-team dependencies. Not "assign a coordinator." Not "give each team its own backlog." Restructure the work.`
         }
       },
       {
         heading: 'Cross-team coordination',
-        body: `When multiple teams work on one product, they must coordinate. In Scrum, coordination is the teams' responsibility â they self-manage across boundaries just as they self-manage within their own borders.
+        body: `When multiple teams work on one product, they must coordinate. In Scrum, coordination is the teams' responsibility — they self-manage across boundaries just as they self-manage within their own borders.
 
 No "Lead Team." No "Chief PO" with veto authority over sub-POs (there are no sub-POs). No external coordinator assigned by management. The teams figure out how to work together.
 
-Practical patterns teams use: joint refinement sessions, Scrum of Scrums (brief cross-team sync), shared communication channels, joint Sprint Reviews. All of these are techniques â none is prescribed by Scrum.`
+Practical patterns teams use: joint refinement sessions, Scrum of Scrums (brief cross-team sync), shared communication channels, joint Sprint Reviews. All of these are techniques — none is prescribed by Scrum.`
       },
       {
         heading: 'The estimation normalization trap',
         body: `A common scaling mistake: "Let's normalize story points across teams so we can compare performance."
 
-This misunderstands estimation. Story points are a team's relative measure of complexity for its own work. Team A's 5-point item and Team B's 5-point item represent entirely different things, and that's fine â because story points aren't meant to be compared across teams.
+This misunderstands estimation. Story points are a team's relative measure of complexity for its own work. Team A's 5-point item and Team B's 5-point item represent entirely different things, and that's fine — because story points aren't meant to be compared across teams.
 
-Normalizing breaks the purpose of estimation (helping the team forecast) and introduces cross-team comparison (which isn't in Scrum and typically corrupts the estimation behavior). If leadership wants cross-team visibility, that's via Increments shipped and value delivered â not story points.`
+Normalizing breaks the purpose of estimation (helping the team forecast) and introduces cross-team comparison (which isn't in Scrum and typically corrupts the estimation behavior). If leadership wants cross-team visibility, that's via Increments shipped and value delivered — not story points.`
       }
     ],
     visual: `<svg viewBox="0 0 520 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;margin:0 auto;display:block"><rect x="210" y="20" width="110" height="45" fill="none" stroke="#e8a838" stroke-width="1.5"/><text x="265" y="42" text-anchor="middle" fill="#e8a838" font-size="12" font-family="Fraunces, serif">1 PO</text><text x="265" y="58" text-anchor="middle" fill="#e8a838" font-size="9" opacity="0.75" font-family="JetBrains Mono, monospace">one per product</text><rect x="210" y="80" width="110" height="45" fill="none" stroke="#e8a838" stroke-width="1.5"/><text x="265" y="102" text-anchor="middle" fill="#e8a838" font-size="12" font-family="Fraunces, serif">1 Backlog</text><text x="265" y="118" text-anchor="middle" fill="#e8a838" font-size="9" opacity="0.75" font-family="JetBrains Mono, monospace">single source of work</text><line x1="265" y1="125" x2="110" y2="175" stroke="currentColor" stroke-width="0.8" opacity="0.4"/><line x1="265" y1="125" x2="265" y2="175" stroke="currentColor" stroke-width="0.8" opacity="0.4"/><line x1="265" y1="125" x2="420" y2="175" stroke="currentColor" stroke-width="0.8" opacity="0.4"/><rect x="60" y="175" width="100" height="60" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.7"/><text x="110" y="197" text-anchor="middle" fill="currentColor" font-size="12" font-family="Fraunces, serif">Team A</text><text x="110" y="215" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.55" font-family="JetBrains Mono, monospace">Sprint Backlog</text><text x="110" y="227" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.55" font-family="JetBrains Mono, monospace">Sprint Goal</text><rect x="215" y="175" width="100" height="60" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.7"/><text x="265" y="197" text-anchor="middle" fill="currentColor" font-size="12" font-family="Fraunces, serif">Team B</text><text x="265" y="215" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.55" font-family="JetBrains Mono, monospace">Sprint Backlog</text><text x="265" y="227" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.55" font-family="JetBrains Mono, monospace">Sprint Goal</text><rect x="370" y="175" width="100" height="60" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.7"/><text x="420" y="197" text-anchor="middle" fill="currentColor" font-size="12" font-family="Fraunces, serif">Team C</text><text x="420" y="215" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.55" font-family="JetBrains Mono, monospace">Sprint Backlog</text><text x="420" y="227" text-anchor="middle" fill="currentColor" font-size="9" opacity="0.55" font-family="JetBrains Mono, monospace">Sprint Goal</text><text x="260" y="254" text-anchor="middle" fill="currentColor" font-size="10" opacity="0.55" font-family="JetBrains Mono, monospace" letter-spacing="1">shared Definition of Done across all teams</text></svg>`,
     mnemonics: [
-      { label: '1 Â· 1 Â· 1 Â· 1', text: 'One Product â one PO, one Backlog, one Product Goal, one DoD.' },
-      { label: 'N Â· N Â· 1âN', text: 'N Sprint Backlogs, N Sprint Goals, 1 to N Scrum Masters.' }
+      { label: '1 · 1 · 1 · 1', text: 'One Product → one PO, one Backlog, one Product Goal, one DoD.' },
+      { label: 'N · N · 1–N', text: 'N Sprint Backlogs, N Sprint Goals, 1 to N Scrum Masters.' }
     ],
     tips: [
       'If any exam answer suggests separate Product Backlogs per team or multiple POs for one product, it\'s wrong.',
       'Cross-team coordination is self-managed by the teams. "Assign a coordinator" or "Lead Developer" answers are traps.',
       'Don\'t normalize estimates across teams. Each team\'s sizes are relative to itself.',
-      'When dependencies between teams are the problem, the answer is usually to restructure the work â not to add coordination overhead.',
+      'When dependencies between teams are the problem, the answer is usually to restructure the work — not to add coordination overhead.',
       'All teams on the same product share the same Definition of Done. Each team can add stricter criteria for itself but can\'t loosen the shared standard.'
     ],
     keyPoints: [
       'One product = one Product Backlog + one Product Owner, regardless of team count.',
       'Each Scrum Team has its own Sprint Backlog and Sprint Goal.',
       'Increments from multiple teams should integrate every Sprint so the combined result is usable.',
-      'Coordination between teams is the teams\' responsibility â they self-manage across the boundary.'
+      'Coordination between teams is the teams\' responsibility — they self-manage across the boundary.'
     ],
     traps: [
       'Do NOT normalize estimates across teams. Estimation is relative to the team doing the work.',
       'No separate Product Backlogs per team. No separate Product Owners per team for the same product.',
-      'No "Lead Developer" as a single point of contact â that violates self-management.',
-      'Self-management refers to how the team does its work (who does what, when, and how) â not team formation. The Scrum Guide doesn\'t prohibit organizations from staffing teams.'
+      'No "Lead Developer" as a single point of contact — that violates self-management.',
+      'Self-management refers to how the team does its work (who does what, when, and how) — not team formation. The Scrum Guide doesn\'t prohibit organizations from staffing teams.'
     ]
   },
 };
 
-/* ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-   QUESTION BANK â curated from Ditectrev PSPO I, reconciled with 2020 Scrum Guide.
+/* ──────────────────────────────────────────────────────────────────────────
+   QUESTION BANK — curated from Ditectrev PSPO I, reconciled with 2020 Scrum Guide.
    Each question has: id, concept, type, selectCount, question, options, correct,
    explanation (general), and optional distractors (why each wrong option is wrong).
-   ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+   ────────────────────────────────────────────────────────────────────────── */
 
 const QUESTIONS = [
-  // âââââââââââ SCRUM THEORY âââââââââââ
+  // ═══════════ SCRUM THEORY ═══════════
   {
     id: 'st1', concept: 'scrum_theory', type: 'single',
     q: 'Which statement best describes Scrum?',
@@ -790,7 +790,7 @@ const QUESTIONS = [
       { id: 'd', t: 'A complete methodology that defines how to develop software.' },
     ],
     correct: ['b'],
-    explanation: 'This is the opening definition from the 2020 Scrum Guide. Scrum is a framework â purposefully incomplete â not a methodology or prescribed process.',
+    explanation: 'This is the opening definition from the 2020 Scrum Guide. Scrum is a framework — purposefully incomplete — not a methodology or prescribed process.',
     distractors: {
       a: 'Scrum is empirical, not defined/predictive. Scientific Management (Taylorism) assumes the work is predictable, which is exactly what Scrum doesn\'t.',
       c: 'Scrum does not prescribe practices. Engineering practices are the team\'s choice.',
@@ -808,7 +808,7 @@ const QUESTIONS = [
       { id: 'e', t: 'Scrum is based on empiricism and lean thinking.' },
     ],
     correct: ['a', 'd', 'e'],
-    explanation: 'The Scrum Guide opens by calling Scrum a lightweight framework. It is founded on empiricism and lean thinking. Each element is purposeful â removing any piece obscures problems.',
+    explanation: 'The Scrum Guide opens by calling Scrum a lightweight framework. It is founded on empiricism and lean thinking. Each element is purposeful — removing any piece obscures problems.',
   },
   {
     id: 'st3', concept: 'scrum_theory', type: 'single',
@@ -854,7 +854,7 @@ const QUESTIONS = [
     q: 'Scrum can only be used to develop products, not to maintain/sustain existing ones.',
     options: [{ id: 'true', t: 'True' }, { id: 'false', t: 'False' }],
     correct: ['false'],
-    explanation: 'Scrum is for complex work of any kind â development, maintenance, sustaining, research, operations. Anywhere empiricism helps.',
+    explanation: 'Scrum is for complex work of any kind — development, maintenance, sustaining, research, operations. Anywhere empiricism helps.',
   },
   {
     id: 'st7', concept: 'scrum_theory', type: 'single',
@@ -881,7 +881,7 @@ const QUESTIONS = [
     explanation: 'Tailoring terminology is a common anti-pattern. It comforts management but disguises the change, and organizations often revert to old habits with Scrum labels on top.',
   },
 
-  // âââââââââââ SCRUM TEAM âââââââââââ
+  // ═══════════ SCRUM TEAM ═══════════
   {
     id: 'stm1', concept: 'scrum_team', type: 'single',
     q: 'What does it mean for a Scrum Team to be cross-functional?',
@@ -892,7 +892,7 @@ const QUESTIONS = [
       { id: 'd', t: 'The Scrum Team includes not only developers but also BAs, architects, and testers.' },
     ],
     correct: ['b'],
-    explanation: 'Cross-functional refers to the team collectively â not to individuals being full-stack experts, and not to a virtual team pulling from silos.',
+    explanation: 'Cross-functional refers to the team collectively — not to individuals being full-stack experts, and not to a virtual team pulling from silos.',
     distractors: {
       a: 'If core work requires outsiders, the team isn\'t cross-functional.',
       c: 'A virtual team from silos is the opposite of a cohesive Scrum Team.',
@@ -916,7 +916,7 @@ const QUESTIONS = [
       { id: 'd', t: 'The Scrum Guide states the Scrum Team is typically 10 or fewer people total.' },
     ],
     correct: ['d'],
-    explanation: 'The 2020 Scrum Guide removed the 3â9 Developer rule. It states the Scrum Team is typically 10 or fewer people total â no hard minimum on Developers.',
+    explanation: 'The 2020 Scrum Guide removed the 3–9 Developer rule. It states the Scrum Team is typically 10 or fewer people total — no hard minimum on Developers.',
   },
   {
     id: 'stm4', concept: 'scrum_team', type: 'multi', selectCount: 3,
@@ -936,7 +936,7 @@ const QUESTIONS = [
     q: 'Self-management means the team can decide which Scrum events are needed.',
     options: [{ id: 'true', t: 'True' }, { id: 'false', t: 'False' }],
     correct: ['false'],
-    explanation: 'Self-management covers who/when/how of work â not whether to follow the Scrum framework. All events are required.',
+    explanation: 'Self-management covers who/when/how of work — not whether to follow the Scrum framework. All events are required.',
   },
   {
     id: 'stm6', concept: 'scrum_team', type: 'tf',
@@ -958,7 +958,7 @@ const QUESTIONS = [
     explanation: 'Membership changes cause productivity drops while the team re-forms. Change when needed, but expect the cost.',
   },
 
-  // âââââââââââ PRODUCT OWNER âââââââââââ
+  // ═══════════ PRODUCT OWNER ═══════════
   {
     id: 'po1', concept: 'product_owner', type: 'single',
     q: 'What is the Product Owner accountable for in Scrum?',
@@ -1106,7 +1106,7 @@ const QUESTIONS = [
     explanation: 'TCO includes the full lifecycle: conception, development, operations, support, maintenance, and eventual sunset.',
   },
 
-  // âââââââââââ SCRUM MASTER âââââââââââ
+  // ═══════════ SCRUM MASTER ═══════════
   {
     id: 'sm1', concept: 'scrum_master', type: 'tf',
     q: 'A Scrum Master fulfills the same role as a traditional Project Manager.',
@@ -1136,7 +1136,7 @@ const QUESTIONS = [
       { id: 'd', t: 'The Scrum Master acts as a "middleman" between the Product Owner and the Developers.' },
     ],
     correct: ['a', 'c'],
-    explanation: 'The SM helps the PO with techniques and removes impediments. The SM is never a middleman â that violates direct collaboration.',
+    explanation: 'The SM helps the PO with techniques and removes impediments. The SM is never a middleman — that violates direct collaboration.',
   },
   {
     id: 'sm4', concept: 'scrum_master', type: 'single',
@@ -1167,10 +1167,10 @@ const QUESTIONS = [
     q: 'The Scrum Master can decide which Scrum Events are required in the Scrum project.',
     options: [{ id: 'true', t: 'True' }, { id: 'false', t: 'False' }],
     correct: ['false'],
-    explanation: 'All Scrum events are required by the framework. Nobody â including the SM â can opt out of events and still be doing Scrum.',
+    explanation: 'All Scrum events are required by the framework. Nobody — including the SM — can opt out of events and still be doing Scrum.',
   },
 
-  // âââââââââââ DEVELOPERS âââââââââââ
+  // ═══════════ DEVELOPERS ═══════════
   {
     id: 'dev1', concept: 'developers', type: 'single',
     q: 'Who is accountable for managing the progress of work during a Sprint?',
@@ -1218,7 +1218,7 @@ const QUESTIONS = [
       { id: 'e', t: 'Finding bugs' },
     ],
     correct: ['b', 'd'],
-    explanation: 'There are no Testers in Scrum â only Developers. The team owns quality collectively.',
+    explanation: 'There are no Testers in Scrum — only Developers. The team owns quality collectively.',
   },
   {
     id: 'dev5', concept: 'developers', type: 'single',
@@ -1244,7 +1244,7 @@ const QUESTIONS = [
     explanation: 'Scope is renegotiated with the PO as more is learned. Hiding the issue harms transparency.',
   },
 
-  // âââââââââââ PRODUCT BACKLOG âââââââââââ
+  // ═══════════ PRODUCT BACKLOG ═══════════
   {
     id: 'pb1', concept: 'product_backlog', type: 'single',
     q: 'What is a Product Backlog?',
@@ -1275,7 +1275,7 @@ const QUESTIONS = [
     q: 'The Product Owner should have the entire Product Backlog documented in detail before the first Sprint can start.',
     options: [{ id: 'true', t: 'True' }, { id: 'false', t: 'False' }],
     correct: ['false'],
-    explanation: 'The Product Backlog is never "complete." A first Sprint needs enough at the top to plan from â that\'s it.',
+    explanation: 'The Product Backlog is never "complete." A first Sprint needs enough at the top to plan from — that\'s it.',
   },
   {
     id: 'pb4', concept: 'product_backlog', type: 'single',
@@ -1324,7 +1324,7 @@ const QUESTIONS = [
       { id: 'e', t: 'The PO takes the time between Sprints to complete refinement.' },
     ],
     correct: ['c', 'd'],
-    explanation: 'Refinement is ongoing Scrum Team work â not a separate team, not a separate Sprint, and not just the PO.',
+    explanation: 'Refinement is ongoing Scrum Team work — not a separate team, not a separate Sprint, and not just the PO.',
   },
   {
     id: 'pb8', concept: 'product_backlog', type: 'multi', selectCount: 2,
@@ -1366,7 +1366,7 @@ const QUESTIONS = [
     explanation: 'The 2020 Scrum Guide does not include a "Definition of Ready." Teams may use one as a technique, but it\'s not prescribed.',
   },
 
-  // âââââââââââ SPRINT BACKLOG âââââââââââ
+  // ═══════════ SPRINT BACKLOG ═══════════
   {
     id: 'sb1', concept: 'sprint_backlog', type: 'single',
     q: 'Who owns the Sprint Backlog?',
@@ -1377,7 +1377,7 @@ const QUESTIONS = [
       { id: 'd', t: 'The Scrum Master' },
     ],
     correct: ['c'],
-    explanation: 'The Sprint Backlog belongs to the Developers â by them, for them.',
+    explanation: 'The Sprint Backlog belongs to the Developers — by them, for them.',
   },
   {
     id: 'sb2', concept: 'sprint_backlog', type: 'tf',
@@ -1408,7 +1408,7 @@ const QUESTIONS = [
       { id: 'd', t: 'Enough so the Developers can create their forecast of what work they can do.' },
     ],
     correct: ['d'],
-    explanation: 'Enough to forecast â the rest emerges during the Sprint.',
+    explanation: 'Enough to forecast — the rest emerges during the Sprint.',
   },
   {
     id: 'sb5', concept: 'sprint_backlog', type: 'tf',
@@ -1418,7 +1418,7 @@ const QUESTIONS = [
     explanation: 'Emergence is explicit in the Scrum Guide. As more is learned, the plan adapts.',
   },
 
-  // âââââââââââ EVENTS âââââââââââ
+  // ═══════════ EVENTS ═══════════
   {
     id: 'ev1', concept: 'events', type: 'multi', selectCount: 3,
     q: 'Which three of the following are timeboxed events in Scrum?',
@@ -1481,7 +1481,7 @@ const QUESTIONS = [
       { id: 'd', t: '8 hours for a one-month Sprint.' },
     ],
     correct: ['d'],
-    explanation: 'Sprint Planning is timeboxed to a maximum of 8 hours for a one-month Sprint â less for shorter Sprints.',
+    explanation: 'Sprint Planning is timeboxed to a maximum of 8 hours for a one-month Sprint — less for shorter Sprints.',
   },
   {
     id: 'ev6', concept: 'events', type: 'tf',
@@ -1531,7 +1531,7 @@ const QUESTIONS = [
       { id: 'd', t: 'Why is this Sprint valuable, what can be done, and how will the chosen work get done.' },
     ],
     correct: ['d'],
-    explanation: 'The 2020 Guide frames Sprint Planning as Why / What / How â in that order. Task assignment is never prescribed.',
+    explanation: 'The 2020 Guide frames Sprint Planning as Why / What / How — in that order. Task assignment is never prescribed.',
   },
   {
     id: 'ev11', concept: 'events', type: 'single',
@@ -1559,7 +1559,7 @@ const QUESTIONS = [
     explanation: 'The three inspect-and-adapt events tied to artifacts: Daily Scrum (Sprint Backlog), Sprint Review (Increment/Product Backlog), Retrospective (the Scrum Team itself).',
   },
 
-  // âââââââââââ ARTIFACTS & COMMITMENTS âââââââââââ
+  // ═══════════ ARTIFACTS & COMMITMENTS ═══════════
   {
     id: 'ac1', concept: 'artifacts_commitments', type: 'single',
     q: 'Who creates the Definition of Done?',
@@ -1596,7 +1596,7 @@ const QUESTIONS = [
       { id: 'd', t: 'During Sprint Planning.' },
     ],
     correct: ['b'],
-    explanation: 'The Retrospective is where the team inspects and adapts how they work â including the DoD.',
+    explanation: 'The Retrospective is where the team inspects and adapts how they work — including the DoD.',
   },
   {
     id: 'ac4', concept: 'artifacts_commitments', type: 'single',
@@ -1657,7 +1657,7 @@ const QUESTIONS = [
     explanation: 'The Product Goal is the team\'s compass: focus, continuity between Sprints, and a reference point for Sprint Review discussions.',
   },
 
-  // âââââââââââ SCALING âââââââââââ
+  // ═══════════ SCALING ═══════════
   {
     id: 'sc1', concept: 'scaling', type: 'multi', selectCount: 2,
     q: 'Which two statements are correct when four teams are working on one single product?',
@@ -1715,7 +1715,7 @@ const QUESTIONS = [
     explanation: 'Structure the work, not the teams. Splitting the Backlog or assigning separate POs violates the "one product, one Backlog, one PO" rule.',
   },
 
-  // âââââââââââ SCRUM THEORY â additional âââââââââââ
+  // ═══════════ SCRUM THEORY — additional ═══════════
   {
     id: 'st9', concept: 'scrum_theory', type: 'single',
     q: 'What does it mean to say that an event has a timebox?',
@@ -1752,7 +1752,7 @@ const QUESTIONS = [
       { id: 'f', t: 'Focus' },
     ],
     correct: ['a', 'c', 'e'],
-    explanation: 'Transparency, Inspection, Adaptation. Commitment, Courage, and Focus are Scrum Values â a different concept.',
+    explanation: 'Transparency, Inspection, Adaptation. Commitment, Courage, and Focus are Scrum Values — a different concept.',
   },
   {
     id: 'st12', concept: 'scrum_theory', type: 'single',
@@ -1783,10 +1783,10 @@ const QUESTIONS = [
       { id: 'd', t: 'The Scrum Master role.' },
     ],
     correct: ['b'],
-    explanation: 'The Scrum Guide calls the Sprint the "heartbeat" of Scrum â it contains all other events and produces the Increment.',
+    explanation: 'The Scrum Guide calls the Sprint the "heartbeat" of Scrum — it contains all other events and produces the Increment.',
   },
 
-  // âââââââââââ SCRUM TEAM â additional âââââââââââ
+  // ═══════════ SCRUM TEAM — additional ═══════════
   {
     id: 'stm8', concept: 'scrum_team', type: 'multi', selectCount: 3,
     q: 'Who is on the Scrum Team?',
@@ -1819,7 +1819,7 @@ const QUESTIONS = [
     q: 'The Scrum Team is accountable for creating a valuable Increment every Sprint.',
     options: [{ id: 'true', t: 'True' }, { id: 'false', t: 'False' }],
     correct: ['true'],
-    explanation: 'Word-for-word from the 2020 Scrum Guide. The whole team â not just Developers â shares this accountability.',
+    explanation: 'Word-for-word from the 2020 Scrum Guide. The whole team — not just Developers — shares this accountability.',
   },
   {
     id: 'stm12', concept: 'scrum_team', type: 'tf',
@@ -1869,7 +1869,7 @@ const QUESTIONS = [
     q: 'What is the Scrum Team\'s focus, according to the 2020 Scrum Guide?',
     options: [
       { id: 'a', t: 'Multiple initiatives balanced across the Sprint.' },
-      { id: 'b', t: 'One objective at a time â the Product Goal.' },
+      { id: 'b', t: 'One objective at a time — the Product Goal.' },
       { id: 'c', t: 'Whatever the stakeholders prioritize most recently.' },
       { id: 'd', t: 'Velocity improvements across Sprints.' },
     ],
@@ -1877,7 +1877,7 @@ const QUESTIONS = [
     explanation: 'The 2020 Scrum Guide is explicit: the Scrum Team focuses on one Product Goal at a time.',
   },
 
-  // âââââââââââ PRODUCT OWNER â additional âââââââââââ
+  // ═══════════ PRODUCT OWNER — additional ═══════════
   {
     id: 'po14', concept: 'product_owner', type: 'tf',
     q: 'During the Sprint Review, the stakeholder\'s role is to reorder the Product Backlog.',
@@ -1897,7 +1897,7 @@ const QUESTIONS = [
     q: 'The value delivered by a product can only be determined by revenue.',
     options: [{ id: 'true', t: 'True' }, { id: 'false', t: 'False' }],
     correct: ['false'],
-    explanation: 'Value includes customer satisfaction, impact, adoption, cost reduction, risk mitigation, and many other factors â revenue is one lens.',
+    explanation: 'Value includes customer satisfaction, impact, adoption, cost reduction, risk mitigation, and many other factors — revenue is one lens.',
   },
   {
     id: 'po17', concept: 'product_owner', type: 'multi', selectCount: 3,
@@ -1935,7 +1935,7 @@ const QUESTIONS = [
       { id: 'd', t: 'Frequently.' },
     ],
     correct: ['d'],
-    explanation: 'Frequent feedback is the principle â the specific interval depends on product context. Calendar-based gates lose signal.',
+    explanation: 'Frequent feedback is the principle — the specific interval depends on product context. Calendar-based gates lose signal.',
   },
   {
     id: 'po20', concept: 'product_owner', type: 'multi', selectCount: 2,
@@ -2002,7 +2002,7 @@ const QUESTIONS = [
       { id: 'e', t: 'Sprint Planning is cancelled so refinement can be done first.' },
     ],
     correct: ['b'],
-    explanation: 'Unclear Product Backlog â low-confidence forecast. The Sprint still happens; the team works with what they have, and refinement improves over time.',
+    explanation: 'Unclear Product Backlog → low-confidence forecast. The Sprint still happens; the team works with what they have, and refinement improves over time.',
   },
   {
     id: 'po26', concept: 'product_owner', type: 'single',
@@ -2118,7 +2118,7 @@ const QUESTIONS = [
       { id: 'c', t: 'Mandatory. The Retrospective is for the Scrum Team to assess and improve itself.' },
     ],
     correct: ['c'],
-    explanation: 'The PO is part of the Scrum Team. The Retrospective is for the whole team to inspect and adapt â PO participation is required.',
+    explanation: 'The PO is part of the Scrum Team. The Retrospective is for the whole team to inspect and adapt — PO participation is required.',
   },
   {
     id: 'po36', concept: 'product_owner', type: 'single',
@@ -2143,7 +2143,7 @@ const QUESTIONS = [
       { id: 'e', t: 'Inform management that more resources are needed.' },
     ],
     correct: ['d'],
-    explanation: 'Scope renegotiation during the Sprint is normal â that\'s how Scrum adapts to learning. The Sprint Goal stays; the PBI set inside it flexes.',
+    explanation: 'Scope renegotiation during the Sprint is normal — that\'s how Scrum adapts to learning. The Sprint Goal stays; the PBI set inside it flexes.',
   },
   {
     id: 'po38', concept: 'product_owner', type: 'single',
@@ -2165,20 +2165,20 @@ const QUESTIONS = [
   },
   {
     id: 'po40', concept: 'product_owner', type: 'tf',
-    q: 'The Product Owner has to maximize value â more features always bring more value, therefore the Product Owner has to maximize the number of features in a Sprint.',
+    q: 'The Product Owner has to maximize value — more features always bring more value, therefore the Product Owner has to maximize the number of features in a Sprint.',
     options: [{ id: 'true', t: 'True' }, { id: 'false', t: 'False' }],
     correct: ['false'],
-    explanation: 'More features â  more value. Often the highest-value choice is doing less. Feature-cramming undermines quality and focus.',
+    explanation: 'More features ≠ more value. Often the highest-value choice is doing less. Feature-cramming undermines quality and focus.',
   },
   {
     id: 'po41', concept: 'product_owner', type: 'single',
-    q: 'Yes or No: The Product Owner can ask a Developer to order the Product Backlog Items instead of him/her â is that okay?',
+    q: 'Yes or No: The Product Owner can ask a Developer to order the Product Backlog Items instead of him/her — is that okay?',
     options: [{ id: 'yes', t: 'Yes' }, { id: 'no', t: 'No' }],
     correct: ['yes'],
     explanation: 'The PO may delegate the work of ordering but remains accountable for it. Delegation is not abdication.',
   },
 
-  // âââââââââââ SCRUM MASTER â additional âââââââââââ
+  // ═══════════ SCRUM MASTER — additional ═══════════
   {
     id: 'sm7', concept: 'scrum_master', type: 'tf',
     q: 'The Scrum Master can decide which Scrum Artifacts are required in the Scrum project.',
@@ -2243,7 +2243,7 @@ const QUESTIONS = [
       { id: 'e', t: 'Suggest extending the Sprint so the PO has more time.' },
     ],
     correct: ['c'],
-    explanation: 'The SM serves the PO by teaching the purpose behind ordering â value maximization. They don\'t order for the PO or redirect the task to Developers.',
+    explanation: 'The SM serves the PO by teaching the purpose behind ordering — value maximization. They don\'t order for the PO or redirect the task to Developers.',
   },
   {
     id: 'sm13', concept: 'scrum_master', type: 'multi', selectCount: 2,
@@ -2282,10 +2282,10 @@ const QUESTIONS = [
       { id: 'e', t: 'Learn why the Developers want this and work with them to improve the outcome of the Daily Scrum.' },
     ],
     correct: ['b', 'e'],
-    explanation: 'The Daily Scrum is daily by definition â it\'s not negotiable. Coach the team and dig into the underlying problem that\'s making them want to skip it.',
+    explanation: 'The Daily Scrum is daily by definition — it\'s not negotiable. Coach the team and dig into the underlying problem that\'s making them want to skip it.',
   },
 
-  // âââââââââââ DEVELOPERS â additional âââââââââââ
+  // ═══════════ DEVELOPERS — additional ═══════════
   {
     id: 'dev7', concept: 'developers', type: 'single',
     q: 'What is the perfect number of hours a Developer should work in a week?',
@@ -2390,7 +2390,7 @@ const QUESTIONS = [
     explanation: 'The Developers plan the "how." The Sprint Goal (why) and selected items (what) involve the whole team; the plan is Developer-owned.',
   },
 
-  // âââââââââââ PRODUCT BACKLOG â additional âââââââââââ
+  // ═══════════ PRODUCT BACKLOG — additional ═══════════
   {
     id: 'pb12', concept: 'product_backlog', type: 'single',
     q: 'A new Product Owner asks where to put stability requirements, performance requirements, documentation, and fixes. Are all of these acceptable on a Product Backlog?',
@@ -2412,7 +2412,7 @@ const QUESTIONS = [
       { id: 'e', t: 'Anything that informs the team to achieve the product\'s goals and optimize value delivered.' },
     ],
     correct: ['e'],
-    explanation: 'Any relevant factor. The Scrum Guide doesn\'t prescribe a recipe â the PO uses judgment informed by goals and value.',
+    explanation: 'Any relevant factor. The Scrum Guide doesn\'t prescribe a recipe — the PO uses judgment informed by goals and value.',
   },
   {
     id: 'pb14', concept: 'product_backlog', type: 'single',
@@ -2425,7 +2425,7 @@ const QUESTIONS = [
       { id: 'e', t: 'A Sprint Review acceptance report.' },
     ],
     correct: ['d'],
-    explanation: 'No specific method is mandated. Burn-down, burn-up, cumulative flow â all are options, not requirements.',
+    explanation: 'No specific method is mandated. Burn-down, burn-up, cumulative flow — all are options, not requirements.',
   },
   {
     id: 'pb15', concept: 'product_backlog', type: 'single',
@@ -2433,7 +2433,7 @@ const QUESTIONS = [
     options: [
       { id: 'a', t: 'Calculating value points is predictive and conflicts with empiricism; therefore not acceptable.' },
       { id: 'b', t: 'Value points are the ultimate way to predict the value the product will provide.' },
-      { id: 'c', t: 'The PO may order using value points or select another technique â the decision is up to them.' },
+      { id: 'c', t: 'The PO may order using value points or select another technique — the decision is up to them.' },
     ],
     correct: ['c'],
     explanation: 'Value points are one technique. The PO chooses whatever works. Scrum doesn\'t mandate or forbid it.',
@@ -2462,7 +2462,7 @@ const QUESTIONS = [
     q: 'The Product Backlog is baselined before Sprint 0.',
     options: [{ id: 'true', t: 'True' }, { id: 'false', t: 'False' }],
     correct: ['false'],
-    explanation: 'There is no Sprint 0. The Product Backlog is emergent â never baselined.',
+    explanation: 'There is no Sprint 0. The Product Backlog is emergent — never baselined.',
   },
   {
     id: 'pb19', concept: 'product_backlog', type: 'tf',
@@ -2485,7 +2485,7 @@ const QUESTIONS = [
       { id: 'a', t: 'Based on size.' },
       { id: 'b', t: 'Based on value.' },
       { id: 'c', t: 'Based on risk.' },
-      { id: 'd', t: 'Based on whatever factors best help achieve goals and maximize value â value, risk, priority, dependencies, and more.' },
+      { id: 'd', t: 'Based on whatever factors best help achieve goals and maximize value — value, risk, priority, dependencies, and more.' },
     ],
     correct: ['d'],
     explanation: 'The Scrum Guide lists these as examples, not as a fixed recipe. Context drives the PO\'s judgment.',
@@ -2538,10 +2538,10 @@ const QUESTIONS = [
       { id: 'd', t: 'The Product Owner is accountable for the Product Backlog.' },
     ],
     correct: ['c', 'd'],
-    explanation: 'Never baselined + PO-accountable = the two key facts. Option A reverses refinement (lower-order items are less refined, not all items). Option B reverses the gradient â top items are SMALLER and MORE detailed, not larger and vague.',
+    explanation: 'Never baselined + PO-accountable = the two key facts. Option A reverses refinement (lower-order items are less refined, not all items). Option B reverses the gradient — top items are SMALLER and MORE detailed, not larger and vague.',
   },
 
-  // âââââââââââ SPRINT BACKLOG â additional âââââââââââ
+  // ═══════════ SPRINT BACKLOG — additional ═══════════
   {
     id: 'sb6', concept: 'sprint_backlog', type: 'tf',
     q: 'When n Scrum teams are working on a product, there are n Sprint Backlogs but only 1 Product Backlog.',
@@ -2558,7 +2558,7 @@ const QUESTIONS = [
       { id: 'c', t: 'It has all the details.' },
     ],
     correct: ['b'],
-    explanation: 'Enough to create the forecast and start â the rest emerges during the Sprint.',
+    explanation: 'Enough to create the forecast and start — the rest emerges during the Sprint.',
   },
   {
     id: 'sb8', concept: 'sprint_backlog', type: 'multi', selectCount: 2,
@@ -2596,7 +2596,7 @@ const QUESTIONS = [
     explanation: 'DoD mid-Sprint changes would invalidate work done against the previous DoD. Product Backlog and Sprint Backlog both evolve during a Sprint.',
   },
 
-  // âââââââââââ EVENTS â additional âââââââââââ
+  // ═══════════ EVENTS — additional ═══════════
   {
     id: 'ev13', concept: 'events', type: 'single',
     q: 'Which are appropriate topics for discussion in a Sprint Retrospective?',
@@ -2615,7 +2615,7 @@ const QUESTIONS = [
     q: 'The Product Owner makes sure the correct stakeholders are invited to the Sprint Retrospective. They might have important instructions for team improvements.',
     options: [{ id: 'true', t: 'True' }, { id: 'false', t: 'False' }],
     correct: ['false'],
-    explanation: 'The Retrospective is for the Scrum Team â it\'s where the team inspects itself and plans improvements. The Scrum Guide describes it as a Scrum Team event, not a stakeholder-inclusive one. The PO is part of the team and attends, but arranging stakeholder attendance is not their role. The team itself can invite others when useful, but that\'s unusual.',
+    explanation: 'The Retrospective is for the Scrum Team — it\'s where the team inspects itself and plans improvements. The Scrum Guide describes it as a Scrum Team event, not a stakeholder-inclusive one. The PO is part of the team and attends, but arranging stakeholder attendance is not their role. The team itself can invite others when useful, but that\'s unusual.',
   },
   {
     id: 'ev15', concept: 'events', type: 'tf',
@@ -2629,7 +2629,7 @@ const QUESTIONS = [
     q: 'An Increment must be released to customers or users at the end of each Sprint.',
     options: [{ id: 'true', t: 'True' }, { id: 'false', t: 'False' }],
     correct: ['false'],
-    explanation: 'The Increment must be usable and potentially releasable â but the PO decides when to release. Usable â  released.',
+    explanation: 'The Increment must be usable and potentially releasable — but the PO decides when to release. Usable ≠ released.',
   },
   {
     id: 'ev17', concept: 'events', type: 'tf',
@@ -2697,7 +2697,7 @@ const QUESTIONS = [
       { id: 'd', t: 'A proportional amount of time on analysis, design, development, and testing.' },
     ],
     correct: ['b'],
-    explanation: 'Done is the standard. If an item doesn\'t meet DoD, it\'s not complete â full stop.',
+    explanation: 'Done is the standard. If an item doesn\'t meet DoD, it\'s not complete — full stop.',
   },
   {
     id: 'ev23', concept: 'events', type: 'multi', selectCount: 2,
@@ -2722,7 +2722,7 @@ const QUESTIONS = [
       { id: 'd', t: 'When the Product Owner is actively working on items from the Sprint Backlog.' },
     ],
     correct: ['d'],
-    explanation: 'The PO attends as a Developer when actively working on Sprint Backlog items â otherwise not required.',
+    explanation: 'The PO attends as a Developer when actively working on Sprint Backlog items — otherwise not required.',
   },
   {
     id: 'ev25', concept: 'events', type: 'single',
@@ -2746,7 +2746,7 @@ const QUESTIONS = [
       { id: 'd', t: 'The Scrum Master selects the most important improvement and places it in the Sprint Backlog.' },
     ],
     correct: ['a'],
-    explanation: 'The 2020 Scrum Guide says the most impactful improvements are addressed as soon as possible â typically in the next Sprint Backlog.',
+    explanation: 'The 2020 Scrum Guide says the most impactful improvements are addressed as soon as possible — typically in the next Sprint Backlog.',
   },
   {
     id: 'ev27', concept: 'events', type: 'single',
@@ -2758,7 +2758,7 @@ const QUESTIONS = [
       { id: 'd', t: 'The Sprint Planning.' },
     ],
     correct: ['c'],
-    explanation: 'The Retrospective is where the team reflects and plans improvements â the Scrum analog of "lessons learned," but recurring and tied to action.',
+    explanation: 'The Retrospective is where the team reflects and plans improvements — the Scrum analog of "lessons learned," but recurring and tied to action.',
   },
   {
     id: 'ev28', concept: 'events', type: 'single',
@@ -2819,27 +2819,27 @@ const QUESTIONS = [
       { id: 'e', t: 'Analyze, describe, and document the requirements for subsequent Sprints.' },
     ],
     correct: ['b', 'c'],
-    explanation: 'Every Sprint â including the first â produces an Increment. No Sprint 0 for up-front analysis or architecture.',
+    explanation: 'Every Sprint — including the first — produces an Increment. No Sprint 0 for up-front analysis or architecture.',
   },
   {
     id: 'ev33', concept: 'events', type: 'single',
     q: 'What typically happens between the end of a Sprint Retrospective and the start of the next Sprint Planning?',
     options: [
       { id: 'a', t: 'User Story grooming.' },
-      { id: 'b', t: 'Nothing â the next Sprint begins immediately.' },
+      { id: 'b', t: 'Nothing — the next Sprint begins immediately.' },
       { id: 'c', t: 'Product Backlog Refinement.' },
     ],
     correct: ['b'],
     explanation: 'Zero gap. The new Sprint begins immediately. Refinement is ongoing inside the Sprint, not a between-Sprint activity.',
   },
 
-  // âââââââââââ ARTIFACTS & COMMITMENTS â additional âââââââââââ
+  // ═══════════ ARTIFACTS & COMMITMENTS — additional ═══════════
   {
     id: 'ac9', concept: 'artifacts_commitments', type: 'tf',
     q: 'The Definition of Done increases transparency and is used by the Developers to forecast how many items can be picked from the Product Backlog.',
     options: [{ id: 'true', t: 'True' }, { id: 'false', t: 'False' }],
     correct: ['true'],
-    explanation: 'A shared DoD lets Developers assess whether they can deliver something truly Done within a Sprint â it directly informs the forecast.',
+    explanation: 'A shared DoD lets Developers assess whether they can deliver something truly Done within a Sprint — it directly informs the forecast.',
   },
   {
     id: 'ac10', concept: 'artifacts_commitments', type: 'multi', selectCount: 2,
@@ -2851,11 +2851,11 @@ const QUESTIONS = [
       { id: 'd', t: 'It helps the Product Owner track the open work during a Sprint.' },
     ],
     correct: ['b', 'c'],
-    explanation: 'The DoD defines what "ready to release" means and makes true progress visible â both critical to the PO\'s value decisions.',
+    explanation: 'The DoD defines what "ready to release" means and makes true progress visible — both critical to the PO\'s value decisions.',
   },
   {
     id: 'ac11', concept: 'artifacts_commitments', type: 'single',
-    q: 'If the Product Owner has concerns about the Definition of Done â what should the Product Owner do?',
+    q: 'If the Product Owner has concerns about the Definition of Done — what should the Product Owner do?',
     options: [
       { id: 'a', t: 'The Product Owner should discuss the Definition of Done with the Developers.' },
       { id: 'b', t: 'The Product Owner should change the Definition of Done.' },
@@ -2893,7 +2893,7 @@ const QUESTIONS = [
     options: [
       { id: 'a', t: 'If you have a high level of technical debt, it could lead to false assumptions about the current state of the system.' },
       { id: 'b', t: 'If you have technical debt, no further features should be developed until the debt is fixed.' },
-      { id: 'c', t: 'It creates uncertainty â as more features are added, more problems occur.' },
+      { id: 'c', t: 'It creates uncertainty — as more features are added, more problems occur.' },
       { id: 'd', t: 'It is the Product Owner\'s task to take it into account during release planning.' },
     ],
     correct: ['a', 'c'],
@@ -2929,7 +2929,7 @@ const QUESTIONS = [
       { id: 'd', t: 'Acceptance Criteria.' },
     ],
     correct: ['c'],
-    explanation: 'The 2020 Scrum Guide introduced commitments for each artifact: Product Backlog â Product Goal, Sprint Backlog â Sprint Goal, Increment â Definition of Done.',
+    explanation: 'The 2020 Scrum Guide introduced commitments for each artifact: Product Backlog → Product Goal, Sprint Backlog → Sprint Goal, Increment → Definition of Done.',
   },
   {
     id: 'ac18', concept: 'artifacts_commitments', type: 'single',
@@ -2941,7 +2941,7 @@ const QUESTIONS = [
       { id: 'd', t: 'Definition of Ready.' },
     ],
     correct: ['b'],
-    explanation: 'Sprint Backlog â Sprint Goal. The Sprint Goal is the commitment that makes the Sprint Backlog meaningful.',
+    explanation: 'Sprint Backlog → Sprint Goal. The Sprint Goal is the commitment that makes the Sprint Backlog meaningful.',
   },
   {
     id: 'ac19', concept: 'artifacts_commitments', type: 'single',
@@ -2953,7 +2953,7 @@ const QUESTIONS = [
       { id: 'd', t: 'Acceptance Criteria.' },
     ],
     correct: ['c'],
-    explanation: 'Increment â Definition of Done. Without the DoD, an Increment has no clear standard.',
+    explanation: 'Increment → Definition of Done. Without the DoD, an Increment has no clear standard.',
   },
   {
     id: 'ac20', concept: 'artifacts_commitments', type: 'tf',
@@ -2963,7 +2963,7 @@ const QUESTIONS = [
     explanation: 'The 2020 Scrum Guide explicitly allows multiple Increments per Sprint. Each meeting the DoD and additive to prior ones.',
   },
 
-  // âââââââââââ SCALING â additional âââââââââââ
+  // ═══════════ SCALING — additional ═══════════
   {
     id: 'sc6', concept: 'scaling', type: 'tf',
     q: 'When n Scrum teams are working on a product, there should always be only 1 Product Owner but 1-n Scrum Masters.',
@@ -2995,17 +2995,17 @@ const QUESTIONS = [
       { id: 'd', t: 'The single Product Owner coordinates all dependencies.' },
     ],
     correct: ['c'],
-    explanation: 'Self-management extends across team boundaries. Teams coordinate directly â no external coordinator, no PO-as-traffic-cop.',
+    explanation: 'Self-management extends across team boundaries. Teams coordinate directly — no external coordinator, no PO-as-traffic-cop.',
   },
   {
     id: 'sc10', concept: 'scaling', type: 'tf',
     q: 'When multiple Scrum Teams work on the same product, they should still have only one Product Goal.',
     options: [{ id: 'true', t: 'True' }, { id: 'false', t: 'False' }],
     correct: ['true'],
-    explanation: 'One product means one Product Goal â the long-term objective shared by all teams building that product.',
+    explanation: 'One product means one Product Goal — the long-term objective shared by all teams building that product.',
   },
 
-  // âââââââââââ GAP COVERAGE â concepts the PDF mentions but my bank didn't fully cover âââââââââââ
+  // ═══════════ GAP COVERAGE — concepts the PDF mentions but my bank didn't fully cover ═══════════
   {
     id: 'st15', concept: 'scrum_theory', type: 'single',
     q: 'The Cone of Uncertainty can be used to do what?',
@@ -3035,7 +3035,7 @@ const QUESTIONS = [
       { id: 'd', t: 'Add them to the Definition of Done so the work is taken care of every Sprint.' },
     ],
     correct: ['b', 'd'],
-    explanation: 'Non-functional requirements belong in two places: on the Product Backlog (for specific needs that can be ordered and refined) and in the DoD (for standards that apply to every Increment â performance, security, accessibility).',
+    explanation: 'Non-functional requirements belong in two places: on the Product Backlog (for specific needs that can be ordered and refined) and in the DoD (for standards that apply to every Increment — performance, security, accessibility).',
   },
   {
     id: 'pb28', concept: 'product_backlog', type: 'single',
@@ -3047,7 +3047,7 @@ const QUESTIONS = [
       { id: 'd', t: 'Assign them to the Scrum Master to track.' },
     ],
     correct: ['a'],
-    explanation: 'Every Increment must be usable, which means NFRs are met every Sprint. Deferring them to a hardening Sprint means your Increments weren\'t really usable â you had hidden debt.',
+    explanation: 'Every Increment must be usable, which means NFRs are met every Sprint. Deferring them to a hardening Sprint means your Increments weren\'t really usable — you had hidden debt.',
   },
   {
     id: 'po44', concept: 'product_owner', type: 'single',
@@ -3059,7 +3059,7 @@ const QUESTIONS = [
       { id: 'd', t: 'Align with stakeholders on scope and deadlines.' },
     ],
     correct: ['c'],
-    explanation: 'Sprint 0 is not a Scrum concept. Every Sprint must produce a valuable, usable Increment â including the first. "Sprint 0" as a setup phase is an anti-pattern imported from phased methodologies.',
+    explanation: 'Sprint 0 is not a Scrum concept. Every Sprint must produce a valuable, usable Increment — including the first. "Sprint 0" as a setup phase is an anti-pattern imported from phased methodologies.',
   },
   {
     id: 'po45', concept: 'product_owner', type: 'single',
@@ -3067,7 +3067,7 @@ const QUESTIONS = [
     options: [
       { id: 'a', t: 'The customer.' },
       { id: 'b', t: 'The Product Owner.' },
-      { id: 'c', t: 'It depends on context â there is no universal hierarchy of stakeholder importance.' },
+      { id: 'c', t: 'It depends on context — there is no universal hierarchy of stakeholder importance.' },
       { id: 'd', t: 'The CEO.' },
     ],
     correct: ['c'],
@@ -3079,11 +3079,11 @@ const QUESTIONS = [
     options: [
       { id: 'a', t: 'The team consistently meets its velocity forecast.' },
       { id: 'b', t: 'All Product Backlog items get done before the deadline.' },
-      { id: 'c', t: 'The product delivers value â measured through customer outcomes, adoption, revenue, or whatever the organization has defined as success.' },
+      { id: 'c', t: 'The product delivers value — measured through customer outcomes, adoption, revenue, or whatever the organization has defined as success.' },
       { id: 'd', t: 'The Definition of Done is never compromised.' },
     ],
     correct: ['c'],
-    explanation: 'Success is about outcomes, not outputs. Velocity, scope completion, and process adherence are means â not the measure.',
+    explanation: 'Success is about outcomes, not outputs. Velocity, scope completion, and process adherence are means — not the measure.',
   },
   {
     id: 'po47', concept: 'product_owner', type: 'single',
@@ -3091,7 +3091,7 @@ const QUESTIONS = [
     options: [
       { id: 'a', t: 'Scrum prescribes a specific budgeting approach based on Sprint count.' },
       { id: 'b', t: 'The Product Owner approves budgets at each Sprint Review.' },
-      { id: 'c', t: 'Scrum does not prescribe a budgeting approach â the organization decides based on its context.' },
+      { id: 'c', t: 'Scrum does not prescribe a budgeting approach — the organization decides based on its context.' },
       { id: 'd', t: 'Budgeting is done upfront based on a detailed Product Backlog estimate.' },
     ],
     correct: ['c'],
@@ -3103,11 +3103,11 @@ const QUESTIONS = [
     options: [
       { id: 'a', t: 'Product Vision is a formal Scrum artifact, maintained separately from the Product Backlog.' },
       { id: 'b', t: 'Product Vision and Product Goal are synonymous in the 2020 Scrum Guide.' },
-      { id: 'c', t: 'Product Vision is not defined in the 2020 Scrum Guide â the Product Goal is the closest equivalent.' },
+      { id: 'c', t: 'Product Vision is not defined in the 2020 Scrum Guide — the Product Goal is the closest equivalent.' },
       { id: 'd', t: 'Product Vision replaces the Product Goal in the 2020 Scrum Guide.' },
     ],
     correct: ['c'],
-    explanation: 'The 2020 Scrum Guide introduced the Product Goal but did not formalize "Product Vision." Many teams still use a vision statement as a useful practice â it\'s just not a Scrum element.',
+    explanation: 'The 2020 Scrum Guide introduced the Product Goal but did not formalize "Product Vision." Many teams still use a vision statement as a useful practice — it\'s just not a Scrum element.',
   },
   {
     id: 'po49', concept: 'product_owner', type: 'multi', selectCount: 2,
@@ -3140,7 +3140,7 @@ const QUESTIONS = [
     options: [
       { id: 'a', t: 'When the Developer starts working on it.' },
       { id: 'b', t: 'When the Developer volunteers to take it on.' },
-      { id: 'c', t: 'Never â the Product Owner is accountable for value; Developers are accountable for the work.' },
+      { id: 'c', t: 'Never — the Product Owner is accountable for value; Developers are accountable for the work.' },
       { id: 'd', t: 'When the Scrum Master assigns it.' },
     ],
     correct: ['c'],
@@ -3156,7 +3156,7 @@ const QUESTIONS = [
       { id: 'd', t: 'The velocity of the Scrum Team.' },
     ],
     correct: ['b'],
-    explanation: 'A burn-down shows remaining work trending toward zero. Scrum doesn\'t require burn-down charts â they\'re one of several optional techniques for showing progress.',
+    explanation: 'A burn-down shows remaining work trending toward zero. Scrum doesn\'t require burn-down charts — they\'re one of several optional techniques for showing progress.',
   },
   {
     id: 'stm17', concept: 'scrum_team', type: 'single',
@@ -3175,29 +3175,29 @@ const QUESTIONS = [
     q: 'Sprint Planning is time-boxed to a maximum of eight hours for a one-month Sprint.',
     options: [{ id: 'true', t: 'True' }, { id: 'false', t: 'False' }],
     correct: ['true'],
-    explanation: '8h for Planning, 4h for Review, 3h for Retro, 15min for Daily â all for a one-month Sprint. Shorter Sprints get proportionally smaller timeboxes.',
+    explanation: '8h for Planning, 4h for Review, 3h for Retro, 15min for Daily — all for a one-month Sprint. Shorter Sprints get proportionally smaller timeboxes.',
   },
   {
     id: 'ev35', concept: 'events', type: 'single',
     q: 'Which of the following are required by Scrum?',
     options: [
       { id: 'a', t: 'Daily Scrum, burndown chart, Definition of Ready.' },
-      { id: 'b', t: 'Sprint Planning, Daily Scrum, Sprint Review, Sprint Retrospective â all five events including the Sprint itself.' },
+      { id: 'b', t: 'Sprint Planning, Daily Scrum, Sprint Review, Sprint Retrospective — all five events including the Sprint itself.' },
       { id: 'c', t: 'User stories, story points, velocity tracking.' },
       { id: 'd', t: 'Release Sprint, Sprint 0, hardening Sprint.' },
     ],
     correct: ['b'],
-    explanation: 'The five events (Sprint, Sprint Planning, Daily Scrum, Sprint Review, Sprint Retrospective) are required. Burndown, user stories, velocity, Definition of Ready â all optional techniques.',
+    explanation: 'The five events (Sprint, Sprint Planning, Daily Scrum, Sprint Review, Sprint Retrospective) are required. Burndown, user stories, velocity, Definition of Ready — all optional techniques.',
   },
   {
     id: 'ac21', concept: 'artifacts_commitments', type: 'tf',
     q: 'Two Scrum Teams working on the same product must share the same Definition of Ready.',
     options: [{ id: 'true', t: 'True' }, { id: 'false', t: 'False' }],
     correct: ['false'],
-    explanation: 'Definition of Ready isn\'t a Scrum concept at all, so the question is a trap. Teams may use a DoR as a technique, but there\'s no Scrum requirement for one â shared or otherwise. Only the DoD must be shared across teams on the same product.',
+    explanation: 'Definition of Ready isn\'t a Scrum concept at all, so the question is a trap. Teams may use a DoR as a technique, but there\'s no Scrum requirement for one — shared or otherwise. Only the DoD must be shared across teams on the same product.',
   },
 
-  // âââââââââââ BRUTAL-DIFFICULTY VARIANTS â weasel words, inverse framings, "primary/best/first" discriminators âââââââââââ
+  // ═══════════ BRUTAL-DIFFICULTY VARIANTS — weasel words, inverse framings, "primary/best/first" discriminators ═══════════
   // These mirror the adversarial phrasing style of the real PSPO I exam.
 
   {
@@ -3210,9 +3210,9 @@ const QUESTIONS = [
       { id: 'd', t: 'Developing and communicating the Product Goal.' },
     ],
     correct: ['c'],
-    explanation: 'All four are PO activities. But "maximizing value" is the accountability â the overarching responsibility. The others are specific Product Backlog management tasks that support the accountability. On the exam, "primary" usually points to the accountability, not the activity.',
+    explanation: 'All four are PO activities. But "maximizing value" is the accountability — the overarching responsibility. The others are specific Product Backlog management tasks that support the accountability. On the exam, "primary" usually points to the accountability, not the activity.',
     distractors: {
-      a: 'Clear communication of PBIs is one of four responsibilities under Product Backlog management â not the primary accountability.',
+      a: 'Clear communication of PBIs is one of four responsibilities under Product Backlog management — not the primary accountability.',
       b: 'Ordering is one of four Product Backlog management responsibilities. Important, but not the overarching accountability.',
       d: 'Developing the Product Goal is one of four PB management responsibilities. Not the primary accountability.',
     },
@@ -3227,10 +3227,10 @@ const QUESTIONS = [
       { id: 'd', t: 'Cancel the Sprint so the new work can be planned properly.' },
     ],
     correct: ['b'],
-    explanation: 'All four are things a PO might do in some scenario. "FIRST" is the discriminator. Because the feature aligns with the Sprint Goal, in-Sprint renegotiation with the Developers is on the table â but the first step is the conversation, not the decision. The PO cannot unilaterally add work to the Sprint Backlog (that\'s the Developers\' artifact).',
+    explanation: 'All four are things a PO might do in some scenario. "FIRST" is the discriminator. Because the feature aligns with the Sprint Goal, in-Sprint renegotiation with the Developers is on the table — but the first step is the conversation, not the decision. The PO cannot unilaterally add work to the Sprint Backlog (that\'s the Developers\' artifact).',
     distractors: {
       a: 'This is safe but skips the renegotiation option. Since the feature aligns with the Sprint Goal, collaborating first is better than deferring automatically.',
-      c: 'The PO cannot add items to the Sprint Backlog directly â that\'s the Developers\' artifact. Collaboration is required.',
+      c: 'The PO cannot add items to the Sprint Backlog directly — that\'s the Developers\' artifact. Collaboration is required.',
       d: 'Cancellation is only warranted when the Sprint Goal becomes obsolete. This scenario does not describe that.',
     },
   },
@@ -3260,7 +3260,7 @@ const QUESTIONS = [
     distractors: {
       a: 'Pausing violates Sprint cadence. Empirical process requires continuing with available information.',
       b: 'Temporary POs create unclear accountability. The accountable PO remains accountable; others may temporarily help make decisions but don\'t inherit the role.',
-      d: 'The SM cannot own PO decisions â the two accountabilities are distinct.',
+      d: 'The SM cannot own PO decisions — the two accountabilities are distinct.',
     },
   },
   {
@@ -3277,7 +3277,7 @@ const QUESTIONS = [
     distractors: {
       a: 'The PO can delegate the writing; they remain accountable for clarity.',
       b: 'Estimates belong to the Developers. The PO has no overrule authority.',
-      d: 'Daily Scrum attendance is never required for the PO â only Developers.',
+      d: 'Daily Scrum attendance is never required for the PO — only Developers.',
     },
   },
   {
@@ -3290,7 +3290,7 @@ const QUESTIONS = [
       { id: 'd', t: 'The Product Owner should split ordering with the Developers 50/50 to respect self-management.' },
     ],
     correct: ['b'],
-    explanation: 'Ordering is the PO\'s accountability. Developer input matters â but input and authority are different things. "MOST appropriate" points to the option that preserves clear accountability without ignoring collaboration.',
+    explanation: 'Ordering is the PO\'s accountability. Developer input matters — but input and authority are different things. "MOST appropriate" points to the option that preserves clear accountability without ignoring collaboration.',
   },
   {
     id: 'b_sm1', concept: 'scrum_master', type: 'single', difficulty: 'brutal',
@@ -3355,7 +3355,7 @@ const QUESTIONS = [
       { id: 'd', t: 'She should use the Sprint for personal training in a new database technology.' },
     ],
     correct: ['b'],
-    explanation: 'Cross-functionality means the TEAM collectively has all skills. Developers aren\'t locked to specialties â they support the Sprint Goal. The other options either idle the Developer (a, d) or distort the Backlog (c).',
+    explanation: 'Cross-functionality means the TEAM collectively has all skills. Developers aren\'t locked to specialties — they support the Sprint Goal. The other options either idle the Developer (a, d) or distort the Backlog (c).',
   },
   {
     id: 'b_dev2', concept: 'developers', type: 'single', difficulty: 'brutal',
@@ -3367,11 +3367,11 @@ const QUESTIONS = [
       { id: 'd', t: 'The entire Scrum Team.' },
     ],
     correct: ['d'],
-    explanation: 'Direct from the 2020 Scrum Guide: "The entire Scrum Team is accountable for creating a valuable, useful Increment every Sprint." The Developers INSTILL quality by adhering to the DoD â that is their specific responsibility. But accountability for the Increment itself belongs to the whole Scrum Team. This distinction is a classic exam trap: people pattern-match to "Developers do the work" and miss that accountability is collective.',
+    explanation: 'Direct from the 2020 Scrum Guide: "The entire Scrum Team is accountable for creating a valuable, useful Increment every Sprint." The Developers INSTILL quality by adhering to the DoD — that is their specific responsibility. But accountability for the Increment itself belongs to the whole Scrum Team. This distinction is a classic exam trap: people pattern-match to "Developers do the work" and miss that accountability is collective.',
     distractors: {
       a: 'The PO determines value but is not solely accountable for the Increment\'s existence.',
       b: 'The SM ensures Scrum is used well but has no accountability for the Increment.',
-      c: 'Developers INSTILL quality (via the DoD) â that is a specific responsibility. But accountability for a valuable, useful Increment is the whole Scrum Team\'s. Confusing "instills quality" with "is accountable for the Increment" is the exact trap the exam sets.',
+      c: 'Developers INSTILL quality (via the DoD) — that is a specific responsibility. But accountability for a valuable, useful Increment is the whole Scrum Team\'s. Confusing "instills quality" with "is accountable for the Increment" is the exact trap the exam sets.',
     },
   },
   {
@@ -3396,10 +3396,10 @@ const QUESTIONS = [
       { id: 'd', t: 'A roadmap showing when each product feature will be released.' },
     ],
     correct: ['b'],
-    explanation: '"BEST" = match the Scrum Guide\'s exact language. "Emergent, ordered" is the 2020 Guide\'s phrasing. "Prioritized" (a) is wrong â ordering is more specific than prioritization. "Comprehensive document" (c) contradicts emergence. "Roadmap with dates" (d) contradicts both emergence and ordering.',
+    explanation: '"BEST" = match the Scrum Guide\'s exact language. "Emergent, ordered" is the 2020 Guide\'s phrasing. "Prioritized" (a) is wrong — ordering is more specific than prioritization. "Comprehensive document" (c) contradicts emergence. "Roadmap with dates" (d) contradicts both emergence and ordering.',
     distractors: {
       a: 'Prioritized allows ties; ordered does not. The Scrum Guide says ordered, not prioritized.',
-      c: 'A "comprehensive document" implies completeness â the Product Backlog is never complete.',
+      c: 'A "comprehensive document" implies completeness — the Product Backlog is never complete.',
       d: 'A dated roadmap implies a fixed future; the Backlog is emergent.',
     },
   },
@@ -3425,7 +3425,7 @@ const QUESTIONS = [
       { id: 'd', t: 'Refinement produces a Definition of Ready that gates Sprint Planning.' },
     ],
     correct: ['b'],
-    explanation: '"MOST accurate" vs the Scrum Guide. Refinement is explicitly not an event â it\'s an ongoing activity. A frames it as an event; C narrows it to the PO alone (wrong â the whole team refines); D introduces Definition of Ready which isn\'t a Scrum concept.',
+    explanation: '"MOST accurate" vs the Scrum Guide. Refinement is explicitly not an event — it\'s an ongoing activity. A frames it as an event; C narrows it to the PO alone (wrong — the whole team refines); D introduces Definition of Ready which isn\'t a Scrum concept.',
   },
   {
     id: 'b_pb4', concept: 'product_backlog', type: 'single', difficulty: 'brutal',
@@ -3454,7 +3454,7 @@ const QUESTIONS = [
     explanation: '"PRIMARY" = Scrum Guide\'s stated purpose. Inspect-and-adapt toward the Sprint Goal is the exact purpose. The other options describe side effects (coordination, awareness) or anti-patterns (status reporting).',
     distractors: {
       a: 'Status reporting is an anti-pattern. The Daily Scrum is for the Developers, not for reporting to others.',
-      b: 'Coordination happens, but it\'s an effect â not the purpose. The purpose is inspection toward the Sprint Goal.',
+      b: 'Coordination happens, but it\'s an effect — not the purpose. The purpose is inspection toward the Sprint Goal.',
       d: 'Awareness is a side effect. The purpose is adapting the plan, not sharing information.',
     },
   },
@@ -3492,7 +3492,7 @@ const QUESTIONS = [
       { id: 'd', t: 'When the Definition of Done cannot be met for selected items.' },
     ],
     correct: ['c'],
-    explanation: 'Only when the Sprint Goal becomes obsolete â this is the sole condition in the Scrum Guide. Falling behind, stakeholder changes, and DoD issues are all handled through renegotiation, not cancellation.',
+    explanation: 'Only when the Sprint Goal becomes obsolete — this is the sole condition in the Scrum Guide. Falling behind, stakeholder changes, and DoD issues are all handled through renegotiation, not cancellation.',
   },
   {
     id: 'b_ev5', concept: 'events', type: 'single', difficulty: 'brutal',
@@ -3504,7 +3504,7 @@ const QUESTIONS = [
       { id: 'd', t: 'A target set by the Product Owner for what value will be delivered.' },
     ],
     correct: ['b'],
-    explanation: 'Single objective, Developer-committed. A confuses items (forecast) with the Goal (committed). C frames it as stakeholder-driven. D frames it as PO-imposed â it\'s co-created by the whole Scrum Team.',
+    explanation: 'Single objective, Developer-committed. A confuses items (forecast) with the Goal (committed). C frames it as stakeholder-driven. D frames it as PO-imposed — it\'s co-created by the whole Scrum Team.',
   },
   {
     id: 'b_ev6', concept: 'events', type: 'single', difficulty: 'brutal',
@@ -3516,7 +3516,7 @@ const QUESTIONS = [
       { id: 'd', t: 'Tools and processes used during the Sprint.' },
     ],
     correct: ['b'],
-    explanation: 'LEAST likely = feature acceptance criteria belong in refinement or Sprint Planning, not the Retrospective. The Retro is about the team â individuals, interactions, processes, tools, DoD.',
+    explanation: 'LEAST likely = feature acceptance criteria belong in refinement or Sprint Planning, not the Retrospective. The Retro is about the team — individuals, interactions, processes, tools, DoD.',
   },
   {
     id: 'b_ev7', concept: 'events', type: 'single', difficulty: 'brutal',
@@ -3552,7 +3552,7 @@ const QUESTIONS = [
       { id: 'd', t: 'Definition of Ready.' },
     ],
     correct: ['c'],
-    explanation: 'Memorize the three pairings: Product Backlog â Product Goal; Sprint Backlog â Sprint Goal; Increment â Definition of Done. Definition of Ready is not a Scrum concept.',
+    explanation: 'Memorize the three pairings: Product Backlog → Product Goal; Sprint Backlog → Sprint Goal; Increment → Definition of Done. Definition of Ready is not a Scrum concept.',
   },
   {
     id: 'b_ac3', concept: 'artifacts_commitments', type: 'single', difficulty: 'brutal',
@@ -3576,7 +3576,7 @@ const QUESTIONS = [
       { id: 'd', t: 'The Product Owner personally verifies each Increment before it is presented.' },
     ],
     correct: ['b'],
-    explanation: '"ALWAYS true" â DoD compliance is the universal requirement. A confuses usable with released (release is a PO decision). C is false (multiple Increments per Sprint are allowed). D is false (DoD compliance, not PO verification, gates the Increment).',
+    explanation: '"ALWAYS true" — DoD compliance is the universal requirement. A confuses usable with released (release is a PO decision). C is false (multiple Increments per Sprint are allowed). D is false (DoD compliance, not PO verification, gates the Increment).',
   },
   {
     id: 'b_sb1', concept: 'sprint_backlog', type: 'single', difficulty: 'brutal',
@@ -3596,11 +3596,11 @@ const QUESTIONS = [
     options: [
       { id: 'a', t: 'Only the Product Owner, with Developer input.' },
       { id: 'b', t: 'The Scrum Master, when impediments arise.' },
-      { id: 'c', t: 'The Developers â they own the Sprint Backlog.' },
+      { id: 'c', t: 'The Developers — they own the Sprint Backlog.' },
       { id: 'd', t: 'Anyone on the Scrum Team, as long as the Sprint Goal is preserved.' },
     ],
     correct: ['c'],
-    explanation: 'The Developers own the Sprint Backlog exclusively. D sounds democratic but is wrong â the PO and SM don\'t have direct authority to modify it. Negotiation with the PO happens through collaboration, not unilateral update.',
+    explanation: 'The Developers own the Sprint Backlog exclusively. D sounds democratic but is wrong — the PO and SM don\'t have direct authority to modify it. Negotiation with the PO happens through collaboration, not unilateral update.',
   },
   {
     id: 'b_sc1', concept: 'scaling', type: 'single', difficulty: 'brutal',
@@ -3660,7 +3660,7 @@ const QUESTIONS = [
       { id: 'd', t: 'A Scrum Team must have at least 5 people to be effective.' },
     ],
     correct: ['b'],
-    explanation: 'The 2020 Scrum Guide removed the old "3 to 9 Developers" rule and replaced it with "typically 10 or fewer people" total. Pre-2020 study materials still often cite the old rule â this is a common trap.',
+    explanation: 'The 2020 Scrum Guide removed the old "3 to 9 Developers" rule and replaced it with "typically 10 or fewer people" total. Pre-2020 study materials still often cite the old rule — this is a common trap.',
   },
   {
     id: 'b_stm2', concept: 'scrum_team', type: 'single', difficulty: 'brutal',
@@ -3669,7 +3669,7 @@ const QUESTIONS = [
       { id: 'a', t: 'It is cross-functional, with all skills necessary to create value each Sprint.' },
       { id: 'b', t: 'It is self-managing and internally decides who does what, when, and how.' },
       { id: 'c', t: 'It consists of sub-teams organized by technical specialty.' },
-      { id: 'd', t: 'It focuses on one objective at a time â the Product Goal.' },
+      { id: 'd', t: 'It focuses on one objective at a time — the Product Goal.' },
     ],
     correct: ['c'],
     explanation: 'EXCEPT = find the false statement. The Scrum Guide explicitly rules out sub-teams and hierarchies within a Scrum Team. The other three are core characteristics.',
@@ -3747,9 +3747,9 @@ const QUESTIONS = [
     explanation: 'Who does the work estimates the work. The Scrum Guide is explicit: Developers size items. A wrongly attributes estimation to the PO. B adds Planning Poker (one technique, not prescribed). D introduces cross-team normalization (anti-pattern).',
   },
 
-  // âââââââââââ SCENARIO QUESTIONS â multi-paragraph judgment calls where all options look plausible âââââââââââ
+  // ═══════════ SCENARIO QUESTIONS — multi-paragraph judgment calls where all options look plausible ═══════════
   // These test applied judgment, not recall. The correct answer upholds Scrum values (servant leadership,
-  // self-management, transparency, empiricism) â often the option that feels LEAST decisive.
+  // self-management, transparency, empiricism) — often the option that feels LEAST decisive.
 
   {
     id: 's_po1', concept: 'product_owner', type: 'single', difficulty: 'scenario',
@@ -3758,23 +3758,23 @@ const QUESTIONS = [
 The current Sprint Goal is "enable two-factor authentication for new customer signups." The Developers are on track to meet it. Adding the compliance feature now would require replacing about 30% of the current Sprint Backlog.`,
     q: 'What is the MOST appropriate response?',
     options: [
-      { id: 'a', t: 'Accept the compliance request and work with the Developers to replace the current Sprint Backlog items â regulatory deadlines are non-negotiable.' },
+      { id: 'a', t: 'Accept the compliance request and work with the Developers to replace the current Sprint Backlog items — regulatory deadlines are non-negotiable.' },
       { id: 'b', t: 'Add the compliance feature to the top of the Product Backlog for the next Sprint, and discuss the trade-off transparently with the compliance director and VP.' },
       { id: 'c', t: 'Split the difference: keep the 2FA Sprint Goal but add the compliance feature as an additional scope item for this Sprint.' },
       { id: 'd', t: 'Ask the Scrum Master to explain to the compliance director that the Sprint Goal cannot change mid-Sprint.' },
     ],
     correct: ['b'],
-    explanation: 'Six weeks is plenty of runway for the next Sprint. Replacing 30% of the current Sprint would jeopardize the Sprint Goal already committed to. The PO\'s job here is to maximize value across BOTH objectives â which means keeping the 2FA Sprint intact while queuing the compliance feature for the next Sprint, and owning the stakeholder communication personally. Option A sacrifices a committed Sprint Goal unnecessarily. Option C overloads the Sprint (stuffing two goals into one). Option D delegates stakeholder management to the SM â not their job.',
+    explanation: 'Six weeks is plenty of runway for the next Sprint. Replacing 30% of the current Sprint would jeopardize the Sprint Goal already committed to. The PO\'s job here is to maximize value across BOTH objectives — which means keeping the 2FA Sprint intact while queuing the compliance feature for the next Sprint, and owning the stakeholder communication personally. Option A sacrifices a committed Sprint Goal unnecessarily. Option C overloads the Sprint (stuffing two goals into one). Option D delegates stakeholder management to the SM — not their job.',
     distractors: {
       a: 'The regulatory deadline is six weeks out; the current Sprint ends in three days. There\'s no actual emergency justifying scrapping a committed Sprint Goal.',
-      c: 'Two goals in one Sprint is not focus â it\'s overloading. Sprint Goals are single objectives for a reason.',
+      c: 'Two goals in one Sprint is not focus — it\'s overloading. Sprint Goals are single objectives for a reason.',
       d: 'Stakeholder communication is PO accountability. Pushing it to the SM is an abdication and also misses the opportunity to educate the stakeholder on how Scrum handles urgent requests.',
     },
   },
 
   {
     id: 's_sm1', concept: 'scrum_master', type: 'single', difficulty: 'scenario',
-    context: `You are the Scrum Master for a team of 7 Developers. Over the last three Sprints, you've noticed that two senior Developers dominate the Daily Scrum and Sprint Planning conversations. The other five, mostly less experienced, have gradually stopped contributing â they answer when asked direct questions but rarely volunteer ideas.
+    context: `You are the Scrum Master for a team of 7 Developers. Over the last three Sprints, you've noticed that two senior Developers dominate the Daily Scrum and Sprint Planning conversations. The other five, mostly less experienced, have gradually stopped contributing — they answer when asked direct questions but rarely volunteer ideas.
 
 At yesterday's Sprint Review, a stakeholder remarked that the team "seems to have lost its energy." The Product Owner has separately asked you whether the team is performing as well as it could.`,
     q: 'What is the BEST action?',
@@ -3785,11 +3785,11 @@ At yesterday's Sprint Review, a stakeholder remarked that the team "seems to hav
       { id: 'd', t: 'Ask the Product Owner to have a conversation with the team about participation during Sprint Planning.' },
     ],
     correct: ['c'],
-    explanation: 'This is a self-management opportunity, not a coaching failure to fix directly. The Retrospective is the designed venue for team dynamics. By raising the pattern (without names) and letting the team own the response, you strengthen self-management. Option A imposes structure from outside â violates self-management. Option B goes behind the team\'s back and treats the two seniors as the "problem" rather than a team dynamic. Option D transfers the work to the PO, who doesn\'t own team dynamics.',
+    explanation: 'This is a self-management opportunity, not a coaching failure to fix directly. The Retrospective is the designed venue for team dynamics. By raising the pattern (without names) and letting the team own the response, you strengthen self-management. Option A imposes structure from outside — violates self-management. Option B goes behind the team\'s back and treats the two seniors as the "problem" rather than a team dynamic. Option D transfers the work to the PO, who doesn\'t own team dynamics.',
     distractors: {
       a: 'Mandating a speaking order imposes process from outside the team. It may fix the symptom but undermines the self-management muscle you want to build.',
       b: 'Private one-on-ones can sometimes be right, but here the pattern is a team dynamic that the team should notice and address collectively.',
-      d: 'The PO doesn\'t own team dynamics â that\'s Scrum Master territory, and within that, a self-managing team territory.',
+      d: 'The PO doesn\'t own team dynamics — that\'s Scrum Master territory, and within that, a self-managing team territory.',
     },
   },
 
@@ -3811,7 +3811,7 @@ After the Daily Scrum, you check the item and realize the Developer has been wor
 
   {
     id: 's_sm2', concept: 'scrum_master', type: 'single', difficulty: 'scenario',
-    context: `You are the Scrum Master for a team that has been working together for six months. The Product Owner has started, over the last two Sprints, to attend Daily Scrums and assign specific items to individual Developers â sometimes reorganizing the Sprint Backlog during the Daily itself.
+    context: `You are the Scrum Master for a team that has been working together for six months. The Product Owner has started, over the last two Sprints, to attend Daily Scrums and assign specific items to individual Developers — sometimes reorganizing the Sprint Backlog during the Daily itself.
 
 The Developers haven't objected, but you sense passive disengagement. Two Developers have privately mentioned they feel "micromanaged." The Product Owner believes they are being helpful and responsive.`,
     q: 'Which is the BEST course of action?',
@@ -3822,29 +3822,29 @@ The Developers haven't objected, but you sense passive disengagement. Two Develo
       { id: 'd', t: 'Ask the two disengaged Developers to raise their concerns directly with the Product Owner.' },
     ],
     correct: ['b'],
-    explanation: 'Serving the PO includes coaching them when their behavior violates Scrum â done privately, in a way that educates rather than publicly corrects. Option A is correct on substance but embarrasses the PO in front of the team. Option C is OK but delays fixing a daily problem to a biweekly event; also risks the Developers feeling exposed. Option D pushes the coaching work onto the Developers, who may not have the skills or standing to redirect the PO.',
+    explanation: 'Serving the PO includes coaching them when their behavior violates Scrum — done privately, in a way that educates rather than publicly corrects. Option A is correct on substance but embarrasses the PO in front of the team. Option C is OK but delays fixing a daily problem to a biweekly event; also risks the Developers feeling exposed. Option D pushes the coaching work onto the Developers, who may not have the skills or standing to redirect the PO.',
   },
 
   {
     id: 's_po3', concept: 'product_owner', type: 'single', difficulty: 'scenario',
     context: `You are the Product Owner for a SaaS product. The product has been live for 18 months. Your current Product Goal is "become the default choice for mid-market accounting teams in the DACH region." You've built steady traction.
 
-A major enterprise prospect (10x your current average deal size) has offered to sign a $2M contract if you can deliver three enterprise-specific features within four months. The features don't align with your Product Goal â they target a different market segment â but the revenue would be transformative.
+A major enterprise prospect (10x your current average deal size) has offered to sign a $2M contract if you can deliver three enterprise-specific features within four months. The features don't align with your Product Goal — they target a different market segment — but the revenue would be transformative.
 
 Your CEO is enthusiastic. Your sales team is already drafting the contract.`,
     q: 'What is the MOST appropriate PO response?',
     options: [
-      { id: 'a', t: 'Accept the contract and pivot the Product Backlog to prioritize the enterprise features â revenue is the ultimate measure of product value.' },
-      { id: 'b', t: 'Decline to add the features, protecting the current Product Goal â consistency matters more than individual deals.' },
+      { id: 'a', t: 'Accept the contract and pivot the Product Backlog to prioritize the enterprise features — revenue is the ultimate measure of product value.' },
+      { id: 'b', t: 'Decline to add the features, protecting the current Product Goal — consistency matters more than individual deals.' },
       { id: 'c', t: 'Have an explicit conversation with the CEO and sales team about the trade-off: either the current Product Goal changes (to include enterprise) or the opportunity passes. Then make the decision transparent and own it.' },
       { id: 'd', t: 'Accept the contract but set the Product Goal aside temporarily while the enterprise work is delivered, resuming the mid-market focus afterward.' },
     ],
     correct: ['c'],
-    explanation: 'The PO\'s job is value-maximization, but also transparency and informed trade-offs. This scenario isn\'t "accept or decline" â it\'s "we cannot serve two Product Goals at once; which one do we pursue, and what do we give up." Making the trade-off explicit, collecting the organization\'s input, and then owning the decision is the PO behavior. Option A treats revenue as the only value. Option B protects process but may sacrifice a better opportunity. Option D pretends the Product Goal can be "paused" â it can\'t; Scrum Teams focus on one goal at a time.',
+    explanation: 'The PO\'s job is value-maximization, but also transparency and informed trade-offs. This scenario isn\'t "accept or decline" — it\'s "we cannot serve two Product Goals at once; which one do we pursue, and what do we give up." Making the trade-off explicit, collecting the organization\'s input, and then owning the decision is the PO behavior. Option A treats revenue as the only value. Option B protects process but may sacrifice a better opportunity. Option D pretends the Product Goal can be "paused" — it can\'t; Scrum Teams focus on one goal at a time.',
     distractors: {
       a: 'Revenue is a value dimension, but not the only one. Single-deal revenue from a non-target market segment may actually hurt long-term product value.',
       b: 'Protecting the Product Goal absolutely can be right, but refusing without exploring the trade-off is abdication of judgment.',
-      d: 'You cannot pause a Product Goal. One goal at a time means either you commit to a new one or you commit to the existing one â pretending to do both is the anti-pattern.',
+      d: 'You cannot pause a Product Goal. One goal at a time means either you commit to a new one or you commit to the existing one — pretending to do both is the anti-pattern.',
     },
   },
 
@@ -3861,12 +3861,12 @@ The Product Owner is currently in a stakeholder meeting and not available for th
       { id: 'd', t: 'Descope the at-risk items yourself and focus on what\'s essential for the Sprint Goal.' },
     ],
     correct: ['c'],
-    explanation: 'The Sprint Backlog belongs to the Developers and updates as they learn. Making the new information visible on the Sprint Backlog (transparency) and syncing with fellow Developers (self-management) should happen immediately. The PO conversation happens as soon as possible â not "wait days." Option A delays visibility. Option B waits until the Daily. Option D makes a unilateral scope decision that properly belongs to the PO-Developers collaboration.',
+    explanation: 'The Sprint Backlog belongs to the Developers and updates as they learn. Making the new information visible on the Sprint Backlog (transparency) and syncing with fellow Developers (self-management) should happen immediately. The PO conversation happens as soon as possible — not "wait days." Option A delays visibility. Option B waits until the Daily. Option D makes a unilateral scope decision that properly belongs to the PO-Developers collaboration.',
   },
 
   {
     id: 's_sm3', concept: 'scrum_master', type: 'single', difficulty: 'scenario',
-    context: `You are the Scrum Master for a new Scrum Team that has completed three Sprints. The Developers are competent but have never worked in Scrum. They treat the Sprint Goal as optional guidance â three times now, they've ended Sprints with most items done but the Sprint Goal unmet.
+    context: `You are the Scrum Master for a new Scrum Team that has completed three Sprints. The Developers are competent but have never worked in Scrum. They treat the Sprint Goal as optional guidance — three times now, they've ended Sprints with most items done but the Sprint Goal unmet.
 
 The Product Owner, who is experienced in Scrum, is frustrated. The Developers are frustrated that the PO keeps "fixating on the Sprint Goal when we got most of the work done."`,
     q: 'Which is the BEST first intervention?',
@@ -3884,7 +3884,7 @@ The Product Owner, who is experienced in Scrum, is frustrated. The Developers ar
     id: 's_po4', concept: 'product_owner', type: 'single', difficulty: 'scenario',
     context: `You are a new Product Owner, three months into the role, for a team you inherited. The Product Backlog has 340 items, many of them small bugs and minor enhancements accumulated over two years. Product Backlog Refinement sessions spend most of their time on small items because stakeholders keep asking about them.
 
-Strategic items â the ones that could move the product meaningfully forward â are in the bottom third of the Backlog and never get refined.`,
+Strategic items — the ones that could move the product meaningfully forward — are in the bottom third of the Backlog and never get refined.`,
     q: 'What should you do?',
     options: [
       { id: 'a', t: 'Close all bug-tracking items older than six months to clean up the Backlog.' },
@@ -3893,7 +3893,7 @@ Strategic items â the ones that could move the product meaningfully forward
       { id: 'd', t: 'Split the Backlog into a "strategic" backlog and a "maintenance" backlog so each gets appropriate attention.' },
     ],
     correct: ['b'],
-    explanation: 'Ordering is the PO\'s accountability and the main tool for directing attention. If strategic items are being ignored, the Backlog\'s order is wrong â fix that first, and stakeholder conversations will follow the new ordering. Option A is a maintenance cleanup but doesn\'t fix ordering. Option C splits refinement time but leaves the ordering that\'s causing the problem. Option D creates separate backlogs â a Scrum anti-pattern that hides dependencies and fragments value discussions.',
+    explanation: 'Ordering is the PO\'s accountability and the main tool for directing attention. If strategic items are being ignored, the Backlog\'s order is wrong — fix that first, and stakeholder conversations will follow the new ordering. Option A is a maintenance cleanup but doesn\'t fix ordering. Option C splits refinement time but leaves the ordering that\'s causing the problem. Option D creates separate backlogs — a Scrum anti-pattern that hides dependencies and fragments value discussions.',
     distractors: {
       a: 'Closing old bugs is fine housekeeping but doesn\'t address why strategic work is at the bottom.',
       c: 'Time-allocating refinement to match broken ordering just entrenches the problem.',
@@ -3908,7 +3908,7 @@ Strategic items â the ones that could move the product meaningfully forward
 This has never been requested before. The Developers don't track hours. Story points are used internally but never compared between individuals.`,
     q: 'What is the BEST response?',
     options: [
-      { id: 'a', t: 'Compile the report using best-available data â you want to maintain good relationships with stakeholders outside the team.' },
+      { id: 'a', t: 'Compile the report using best-available data — you want to maintain good relationships with stakeholders outside the team.' },
       { id: 'b', t: 'Respond that Scrum doesn\'t measure individual Developer productivity and decline to provide the report.' },
       { id: 'c', t: 'Meet with the manager to understand what they\'re actually trying to learn, then coach them on how Scrum provides transparency at the team level (via the Increment and Product Backlog).' },
       { id: 'd', t: 'Forward the request to the Product Owner since it concerns output measurement.' },
@@ -3921,32 +3921,32 @@ This has never been requested before. The Developers don't track hours. Story po
     id: 's_dev2', concept: 'developers', type: 'single', difficulty: 'scenario',
     context: `You are on a Scrum Team where one Developer, hired two months ago, has been consistently missing commitments they make to themselves during Sprint Planning. Items they say they'll complete by day 5 aren't done until day 9. They don't raise impediments. When pressed, they claim everything is "on track."
 
-The Sprint Goal is being met because other Developers pick up the slack. Morale on the team is starting to suffer. You are a fellow Developer â not the Scrum Master.`,
+The Sprint Goal is being met because other Developers pick up the slack. Morale on the team is starting to suffer. You are a fellow Developer — not the Scrum Master.`,
     q: 'What is the MOST appropriate action?',
     options: [
       { id: 'a', t: 'Tell the Scrum Master and let them handle the performance issue.' },
       { id: 'b', t: 'Escalate to the Developer\'s hiring manager since you suspect a capability problem.' },
-      { id: 'c', t: 'Have a direct, honest conversation with the Developer â peer accountability is part of the Developer role.' },
+      { id: 'c', t: 'Have a direct, honest conversation with the Developer — peer accountability is part of the Developer role.' },
       { id: 'd', t: 'Raise it at the next Sprint Retrospective so the team can address it collectively.' },
     ],
     correct: ['c'],
-    explanation: 'The 2020 Scrum Guide names peer accountability as a Developer responsibility: Developers "hold each other accountable as professionals." Option A defers to the SM what is properly a Developer-to-Developer responsibility. Option B escalates outside the team. Option D is also valid but slower â for repeated behavior affecting the team, direct conversation first is professional practice. If direct conversation doesn\'t work, then the Retro is the next step.',
+    explanation: 'The 2020 Scrum Guide names peer accountability as a Developer responsibility: Developers "hold each other accountable as professionals." Option A defers to the SM what is properly a Developer-to-Developer responsibility. Option B escalates outside the team. Option D is also valid but slower — for repeated behavior affecting the team, direct conversation first is professional practice. If direct conversation doesn\'t work, then the Retro is the next step.',
   },
 
   {
     id: 's_po5', concept: 'product_owner', type: 'single', difficulty: 'scenario',
-    context: `You are the Product Owner. The Developers have proposed spending the next Sprint entirely on technical debt reduction â no new features, no customer-visible changes. Their argument: accumulated debt has slowed the team's ability to deliver over the last six months, and without a focused cleanup Sprint, future Sprints will continue to slow.
+    context: `You are the Product Owner. The Developers have proposed spending the next Sprint entirely on technical debt reduction — no new features, no customer-visible changes. Their argument: accumulated debt has slowed the team's ability to deliver over the last six months, and without a focused cleanup Sprint, future Sprints will continue to slow.
 
 Your biggest stakeholder is pressuring you for a customer-facing feature in the next two weeks.`,
     q: 'What is the BEST response?',
     options: [
-      { id: 'a', t: 'Accept the Developers\' proposal â they understand the technical reality and a dedicated Sprint is the efficient solution.' },
+      { id: 'a', t: 'Accept the Developers\' proposal — they understand the technical reality and a dedicated Sprint is the efficient solution.' },
       { id: 'b', t: 'Decline the dedicated Sprint and instead add technical debt items to the Product Backlog to be ordered alongside feature work.' },
       { id: 'c', t: 'Negotiate a compromise: half the Sprint on debt, half on the stakeholder feature.' },
       { id: 'd', t: 'Accept the dedicated Sprint but only if the Developers can prove the time savings quantitatively.' },
     ],
     correct: ['b'],
-    explanation: 'Technical debt is real work that affects product value. It belongs in the Product Backlog like everything else, where the PO can weigh it against features based on value and risk. A dedicated "cleanup Sprint" is a mild anti-pattern â it defers integration of quality thinking into ongoing work. Option A abdicates ordering authority. Option C stuffs two objectives into one Sprint. Option D treats technical judgment as something requiring proof, which damages trust.',
+    explanation: 'Technical debt is real work that affects product value. It belongs in the Product Backlog like everything else, where the PO can weigh it against features based on value and risk. A dedicated "cleanup Sprint" is a mild anti-pattern — it defers integration of quality thinking into ongoing work. Option A abdicates ordering authority. Option C stuffs two objectives into one Sprint. Option D treats technical judgment as something requiring proof, which damages trust.',
     distractors: {
       a: 'Accepting a full "cleanup Sprint" gives up your ordering accountability. Better: treat debt items as first-class Backlog items.',
       c: 'Two objectives in one Sprint = no Sprint Goal focus. Don\'t negotiate the structure; negotiate the Backlog order.',
@@ -3962,12 +3962,12 @@ The Sprint Review is timeboxed at four hours and you're 90 minutes in.`,
     q: 'What should you do?',
     options: [
       { id: 'a', t: 'Step in and redirect: remind the room that Sprint Review is a working session to inspect the Increment and adapt the Product Backlog, not a blame session.' },
-      { id: 'b', t: 'Let the conversation play out â stakeholder feedback, even uncomfortable feedback, is valuable and the PO can handle it.' },
+      { id: 'b', t: 'Let the conversation play out — stakeholder feedback, even uncomfortable feedback, is valuable and the PO can handle it.' },
       { id: 'c', t: 'End the Sprint Review early; ask the PO to meet with the unhappy stakeholder separately to address specific concerns.' },
       { id: 'd', t: 'Ask the PO if they want you to intervene, then act based on their answer.' },
     ],
     correct: ['a'],
-    explanation: 'The SM ensures events are positive and productive. That includes intervening when an event derails. The intervention isn\'t about silencing the stakeholder â it\'s about redirecting the conversation to the event\'s actual purpose (inspect Increment, adapt Backlog), which includes the valid concerns. Option B lets the event become unproductive. Option C ends a valid Sprint Review prematurely. Option D asks permission for something the SM is accountable for.',
+    explanation: 'The SM ensures events are positive and productive. That includes intervening when an event derails. The intervention isn\'t about silencing the stakeholder — it\'s about redirecting the conversation to the event\'s actual purpose (inspect Increment, adapt Backlog), which includes the valid concerns. Option B lets the event become unproductive. Option C ends a valid Sprint Review prematurely. Option D asks permission for something the SM is accountable for.',
   },
 
   {
@@ -3975,13 +3975,13 @@ The Sprint Review is timeboxed at four hours and you're 90 minutes in.`,
     context: `You are the Scrum Master for a team that has asked, as a team, to stop holding the Daily Scrum. Their reasoning: they're all co-located in the same room, talk constantly throughout the day, and feel the 15-minute Daily is redundant. They are self-managing well, are hitting Sprint Goals, and the Product Owner is satisfied.`,
     q: 'What should you do?',
     options: [
-      { id: 'a', t: 'Agree to their proposal â a self-managing team that communicates constantly may not need the formal event.' },
+      { id: 'a', t: 'Agree to their proposal — a self-managing team that communicates constantly may not need the formal event.' },
       { id: 'b', t: 'Explain that the Daily Scrum is a required Scrum event and cannot be removed, then explore with the team what\'s making it feel redundant.' },
       { id: 'c', t: 'Reduce the Daily Scrum to three times a week as a compromise.' },
       { id: 'd', t: 'Let the team trial removing the Daily for one Sprint and see what happens.' },
     ],
     correct: ['b'],
-    explanation: 'All five Scrum events are required by the framework. A team cannot "opt out" of one because they don\'t find value in it today â but the SM should absolutely explore WHY it feels redundant, because that\'s useful signal about how the event is being run. Option A violates the framework. Options C and D also modify the framework to accommodate team preference. The right move: hold the line on the rule AND coach the team on making the event valuable.',
+    explanation: 'All five Scrum events are required by the framework. A team cannot "opt out" of one because they don\'t find value in it today — but the SM should absolutely explore WHY it feels redundant, because that\'s useful signal about how the event is being run. Option A violates the framework. Options C and D also modify the framework to accommodate team preference. The right move: hold the line on the rule AND coach the team on making the event valuable.',
   },
 
   {
@@ -3991,29 +3991,29 @@ The Sprint Review is timeboxed at four hours and you're 90 minutes in.`,
 Your Scrum Team has been performing well under Scrum for a year. You can see both upsides (clearer outcome focus) and risks (OKR cadences and the Sprint cadence may conflict).`,
     q: 'What is the BEST response?',
     options: [
-      { id: 'a', t: 'Reject the OKR overlay â Scrum already provides the necessary focus and adding frameworks causes friction.' },
-      { id: 'b', t: 'Accept fully â OKRs align product work with organizational strategy and you should integrate them.' },
+      { id: 'a', t: 'Reject the OKR overlay — Scrum already provides the necessary focus and adding frameworks causes friction.' },
+      { id: 'b', t: 'Accept fully — OKRs align product work with organizational strategy and you should integrate them.' },
       { id: 'c', t: 'Engage with leadership on how OKRs can complement rather than replace Scrum: the Product Goal can be expressed as an Objective, Key Results can inform Backlog ordering, but Scrum\'s cadence and artifacts stay intact.' },
       { id: 'd', t: 'Defer the decision to the Scrum Master, who is responsible for the team\'s framework adoption.' },
     ],
     correct: ['c'],
-    explanation: 'Scrum is a framework, purposefully incomplete. It can coexist with other frameworks (OKRs, strategic planning, portfolio management) if the overlay doesn\'t break Scrum\'s core mechanisms. The PO\'s job is to engage with this integration thoughtfully â not reject it wholesale, not accept it uncritically, not defer it. Option A is ideologically pure but unhelpful. Option B accepts without considering what breaks. Option D defers PO work to the SM.',
+    explanation: 'Scrum is a framework, purposefully incomplete. It can coexist with other frameworks (OKRs, strategic planning, portfolio management) if the overlay doesn\'t break Scrum\'s core mechanisms. The PO\'s job is to engage with this integration thoughtfully — not reject it wholesale, not accept it uncritically, not defer it. Option A is ideologically pure but unhelpful. Option B accepts without considering what breaks. Option D defers PO work to the SM.',
   },
 
   {
     id: 's_dev3', concept: 'developers', type: 'single', difficulty: 'scenario',
-    context: `You are a Developer. During the current Sprint, you discover that a seemingly small Product Backlog Item you're implementing has architectural implications â the "right" way to build it requires a larger refactor that would span multiple Sprints. The "quick" way works but will create significant technical debt.
+    context: `You are a Developer. During the current Sprint, you discover that a seemingly small Product Backlog Item you're implementing has architectural implications — the "right" way to build it requires a larger refactor that would span multiple Sprints. The "quick" way works but will create significant technical debt.
 
 The item is the last one required to meet the Sprint Goal. The Sprint ends in two days.`,
     q: 'What should you do?',
     options: [
       { id: 'a', t: 'Implement the quick version to meet the Sprint Goal; raise the refactor as a Product Backlog item for the Product Owner to consider.' },
-      { id: 'b', t: 'Implement the refactor in full, even if it means missing the Sprint Goal â quality is non-negotiable.' },
+      { id: 'b', t: 'Implement the refactor in full, even if it means missing the Sprint Goal — quality is non-negotiable.' },
       { id: 'c', t: 'Bring the trade-off to the Product Owner and the other Developers immediately; collectively decide whether to accept the debt or renegotiate the Sprint.' },
       { id: 'd', t: 'Implement a partial refactor that gets most of the benefit without blowing the Sprint.' },
     ],
     correct: ['c'],
-    explanation: 'Transparency first. This is exactly the kind of decision that needs visibility â not because the Developer can\'t handle it, but because the trade-off affects product value (PO concern) and future Sprints (team concern). Option A unilaterally accepts technical debt â not the Developer\'s call alone. Option B unilaterally rejects the Sprint Goal â also not the Developer\'s call. Option D makes a design compromise without input.',
+    explanation: 'Transparency first. This is exactly the kind of decision that needs visibility — not because the Developer can\'t handle it, but because the trade-off affects product value (PO concern) and future Sprints (team concern). Option A unilaterally accepts technical debt — not the Developer\'s call alone. Option B unilaterally rejects the Sprint Goal — also not the Developer\'s call. Option D makes a design compromise without input.',
   },
 
   {
@@ -4023,23 +4023,23 @@ The item is the last one required to meet the Sprint Goal. The Sprint ends in tw
 The Product Owner is uncertain. You are the Scrum Master.`,
     q: 'Which is the BEST facilitation approach?',
     options: [
-      { id: 'a', t: 'Support the Developers â the DoD belongs to them and they should be empowered to refine it.' },
+      { id: 'a', t: 'Support the Developers — the DoD belongs to them and they should be empowered to refine it.' },
       { id: 'b', t: 'Defer to the Product Owner\'s judgment since they represent stakeholder interests.' },
       { id: 'c', t: 'Facilitate a conversation focused on the underlying question: what does "Done" mean for our Increment to be usable by stakeholders, and does documentation serve that?' },
       { id: 'd', t: 'Recommend keeping the DoD as-is for now and re-evaluating in three months when more data is available.' },
     ],
     correct: ['c'],
-    explanation: 'The DoD belongs to the Scrum Team (not just Developers, and not just the PO) â unless an organizational DoD imposes a minimum. The SM\'s role is facilitating the Team\'s decision, not making it. Option A gets the ownership wrong (team, not Developers alone). Option B gets it wrong the other direction. Option D delays without addressing the real question.',
+    explanation: 'The DoD belongs to the Scrum Team (not just Developers, and not just the PO) — unless an organizational DoD imposes a minimum. The SM\'s role is facilitating the Team\'s decision, not making it. Option A gets the ownership wrong (team, not Developers alone). Option B gets it wrong the other direction. Option D delays without addressing the real question.',
     distractors: {
-      a: 'The Developers own the Sprint Backlog, but the Definition of Done is the whole Scrum Team\'s â PO included.',
+      a: 'The Developers own the Sprint Backlog, but the Definition of Done is the whole Scrum Team\'s — PO included.',
       b: 'The PO doesn\'t own the DoD alone either. The Scrum Team owns it collectively.',
-      d: 'Delaying the decision doesn\'t help. Facilitate the conversation now â that\'s what the Retrospective is for.',
+      d: 'Delaying the decision doesn\'t help. Facilitate the conversation now — that\'s what the Retrospective is for.',
     },
   },
 
   {
     id: 's_sc1', concept: 'scaling', type: 'single', difficulty: 'scenario',
-    context: `Your organization has three Scrum Teams working on a single product, sharing one Product Owner, one Product Backlog, and one Definition of Done. The teams have different Sprint schedules â Team A is on two-week Sprints, Team B on three-week Sprints, Team C on one-month Sprints.
+    context: `Your organization has three Scrum Teams working on a single product, sharing one Product Owner, one Product Backlog, and one Definition of Done. The teams have different Sprint schedules — Team A is on two-week Sprints, Team B on three-week Sprints, Team C on one-month Sprints.
 
 Integration across teams has become a nightmare. Increments from different teams don't combine cleanly, and the Sprint Reviews are chaotic because teams are at different points in their cycles.`,
     q: 'What is the MOST effective change?',
@@ -4050,7 +4050,7 @@ Integration across teams has become a nightmare. Increments from different teams
       { id: 'd', t: 'Keep the current structure but have the teams hold joint Sprint Reviews at the end of each calendar month.' },
     ],
     correct: ['a'],
-    explanation: 'Multiple teams on one product need the same cadence so Increments can integrate each Sprint. Different Sprint lengths force artificial coordination overhead. Option B adds an anti-pattern (integration team â violates self-management and doesn\'t fix the root issue). Option C splits the Backlog (anti-pattern). Option D leaves the real problem unsolved.',
+    explanation: 'Multiple teams on one product need the same cadence so Increments can integrate each Sprint. Different Sprint lengths force artificial coordination overhead. Option B adds an anti-pattern (integration team — violates self-management and doesn\'t fix the root issue). Option C splits the Backlog (anti-pattern). Option D leaves the real problem unsolved.',
   },
 
   {
@@ -4060,8 +4060,8 @@ Integration across teams has become a nightmare. Increments from different teams
 Your Product Backlog has roughly six months of well-refined items at the top and increasingly vague items below. The product is still early enough that user feedback often changes direction.`,
     q: 'What should you do?',
     options: [
-      { id: 'a', t: 'Produce the roadmap as requested â the CEO has legitimate authority and board commitments are necessary for funding.' },
-      { id: 'b', t: 'Refuse to produce a detailed roadmap â Scrum is empirical and cannot commit to features 12 months out.' },
+      { id: 'a', t: 'Produce the roadmap as requested — the CEO has legitimate authority and board commitments are necessary for funding.' },
+      { id: 'b', t: 'Refuse to produce a detailed roadmap — Scrum is empirical and cannot commit to features 12 months out.' },
       { id: 'c', t: 'Produce a directional roadmap that shows current Product Goal, near-term likely work, and longer-term themes without committing to specific features in specific quarters. Discuss with the CEO what they actually need for the board.' },
       { id: 'd', t: 'Produce the detailed roadmap but add extensive caveats about why commitments are likely to change.' },
     ],
@@ -4071,23 +4071,23 @@ Your Product Backlog has roughly six months of well-refined items at the top and
 
   {
     id: 's_ev2', concept: 'events', type: 'single', difficulty: 'scenario',
-    context: `You are the Product Owner. It's the end of a Sprint, and the Developers come to you during the Sprint Review with a completed Increment â but three Product Backlog items that were forecast at Sprint Planning are not Done. The Developers explain that unexpected technical complexity consumed more time than expected.
+    context: `You are the Product Owner. It's the end of a Sprint, and the Developers come to you during the Sprint Review with a completed Increment — but three Product Backlog items that were forecast at Sprint Planning are not Done. The Developers explain that unexpected technical complexity consumed more time than expected.
 
 A key stakeholder attending the Review asks, pointedly, why the team "failed to deliver what they committed to."`,
     q: 'What is the BEST response?',
     options: [
       { id: 'a', t: 'Acknowledge the miss and apologize on behalf of the team; commit to doing better next Sprint.' },
-      { id: 'b', t: 'Correct the stakeholder: the Sprint Goal â not the item list â is the commitment, and the Sprint Goal was met.' },
+      { id: 'b', t: 'Correct the stakeholder: the Sprint Goal — not the item list — is the commitment, and the Sprint Goal was met.' },
       { id: 'c', t: 'Explain that the Developers forecast what they believe they can complete, but forecasts are not commitments; discuss the learning this Sprint surfaced and how it will inform the Product Backlog.' },
       { id: 'd', t: 'Defer to the Scrum Master to explain Scrum principles to the stakeholder.' },
     ],
     correct: ['c'],
-    explanation: 'This is a teaching moment done tactfully. The stakeholder\'s framing is wrong (items aren\'t committed to), but correcting them bluntly (option B) is defensive. Apologizing (option A) accepts a false premise. Deferring (option D) abdicates PO responsibility. Option C explains the distinction AND redirects to what the Sprint Review is actually for â inspecting what was learned and adapting the Backlog.',
+    explanation: 'This is a teaching moment done tactfully. The stakeholder\'s framing is wrong (items aren\'t committed to), but correcting them bluntly (option B) is defensive. Apologizing (option A) accepts a false premise. Deferring (option D) abdicates PO responsibility. Option C explains the distinction AND redirects to what the Sprint Review is actually for — inspecting what was learned and adapting the Backlog.',
   },
 
   {
     id: 's_sm6', concept: 'scrum_master', type: 'single', difficulty: 'scenario',
-    context: `You are the Scrum Master. Your Product Owner has been in the role for four years and is well-regarded. Over the last two Sprints, you've observed that the PO has been making product decisions without consulting the Developers â specifically, changing item priorities mid-Sprint without conversation, adding new items to the Sprint Backlog themselves, and publicly reversing Developer-proposed splits of items.
+    context: `You are the Scrum Master. Your Product Owner has been in the role for four years and is well-regarded. Over the last two Sprints, you've observed that the PO has been making product decisions without consulting the Developers — specifically, changing item priorities mid-Sprint without conversation, adding new items to the Sprint Backlog themselves, and publicly reversing Developer-proposed splits of items.
 
 The Developers haven't formally complained. They've started being less engaged at Sprint Planning.`,
     q: 'What is the BEST first action?',
@@ -4102,9 +4102,9 @@ The Developers haven't formally complained. They've started being less engaged a
   },
 ];
 
-/* ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+/* ──────────────────────────────────────────────────────────────────────────
    STATE + PERSISTENCE
-   ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+   ────────────────────────────────────────────────────────────────────────── */
 
 const STORAGE_KEY = 'pspo-progress-v1';
 
@@ -4182,9 +4182,9 @@ function arraysEqualAsSet(a, b) {
   return true;
 }
 
-/* ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+/* ──────────────────────────────────────────────────────────────────────────
    STYLE INJECTION
-   ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+   ────────────────────────────────────────────────────────────────────────── */
 
 const STYLE = `
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
@@ -4374,9 +4374,9 @@ const STYLE = `
 }
 `;
 
-/* ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+/* ──────────────────────────────────────────────────────────────────────────
    COMPONENTS
-   ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+   ────────────────────────────────────────────────────────────────────────── */
 
 function MasteryDots({ coverage, questionCount }) {
   const filled = Math.round(coverage * 5);
@@ -4393,7 +4393,7 @@ function Header({ stats, onNav, currentView }) {
   return (
     <header style={{ borderBottom: '1px solid var(--border)', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
       <button onClick={() => onNav('home')} style={{ display: 'flex', alignItems: 'baseline', gap: 12, textAlign: 'left' }}>
-        <span className="display" style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.02em' }}>PSPO<span className="accent" style={{ fontStyle: 'italic' }}>Â·I</span></span>
+        <span className="display" style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.02em' }}>PSPO<span className="accent" style={{ fontStyle: 'italic' }}>·I</span></span>
         <span className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.15em' }}>Trainer</span>
       </button>
       <nav style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -4440,7 +4440,7 @@ function HomeView({ progress, onPickConcept, onStartReview, onStartQuick, onStar
     <div className="container-max fade-in">
       <section style={{ marginBottom: 48 }}>
         <div className="mono faint" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16 }}>
-          2020 Scrum Guide Â· {QUESTIONS.length} questions Â· {CONCEPTS.length} concepts
+          2020 Scrum Guide · {QUESTIONS.length} questions · {CONCEPTS.length} concepts
         </div>
         <h1 className="display" style={{ fontSize: 'clamp(34px, 6vw, 52px)', lineHeight: 1.05, margin: '0 0 20px', fontWeight: 500, letterSpacing: '-0.02em' }}>
           Learn the framework.<br />
@@ -4451,18 +4451,18 @@ function HomeView({ progress, onPickConcept, onStartReview, onStartQuick, onStar
         </p>
 
         <div style={{ display: 'flex', gap: 12, marginTop: 32, flexWrap: 'wrap' }}>
-          <button className="btn primary" onClick={onStartQuick}>Quick Quiz Â· 10 random</button>
+          <button className="btn primary" onClick={onStartQuick}>Quick Quiz · 10 random</button>
           <button className="btn" onClick={onStartMock} style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}>
-            â Mock Exam Â· 80 Qs Â· 60 min
+            ◉ Mock Exam · 80 Qs · 60 min
           </button>
           {wrongQueueSize > 0 && (
             <button className="btn" onClick={onStartReview}>
-              Review Queue Â· <span style={{ color: 'var(--accent)' }}>{wrongQueueSize}</span>
+              Review Queue · <span style={{ color: 'var(--accent)' }}>{wrongQueueSize}</span>
             </button>
           )}
           {overallAccuracy !== null && (
             <div className="mono dim" style={{ fontSize: 11, alignSelf: 'center', textTransform: 'uppercase', letterSpacing: '0.14em' }}>
-              Overall accuracy Â· <span className="numeric" style={{ color: 'var(--text)' }}>{overallAccuracy}%</span>
+              Overall accuracy · <span className="numeric" style={{ color: 'var(--text)' }}>{overallAccuracy}%</span>
             </div>
           )}
         </div>
@@ -4507,7 +4507,7 @@ function HomeView({ progress, onPickConcept, onStartReview, onStartQuick, onStar
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <MasteryDots coverage={m.coverage} questionCount={m.questionCount} />
                   <span className="mono faint" style={{ fontSize: 10, letterSpacing: '0.1em' }}>
-                    {m.totalAnswered > 0 ? `${Math.round(m.accuracy * 100)}% Â· ${m.totalAnswered}` : `${m.questionCount} Qs`}
+                    {m.totalAnswered > 0 ? `${Math.round(m.accuracy * 100)}% · ${m.totalAnswered}` : `${m.questionCount} Qs`}
                   </span>
                 </div>
               </button>
@@ -4526,10 +4526,10 @@ function LessonView({ conceptId, onStart, onBack }) {
 
   return (
     <div className="container-max fade-in">
-      <button className="btn ghost" onClick={onBack} style={{ marginBottom: 24 }}>â Back</button>
+      <button className="btn ghost" onClick={onBack} style={{ marginBottom: 24 }}>← Back</button>
 
       <div className="mono faint" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 12 }}>
-        Lesson Â· {concept.subtitle}
+        Lesson · {concept.subtitle}
       </div>
       <h1 className="display" style={{ fontSize: 'clamp(32px, 5vw, 44px)', lineHeight: 1.1, margin: '0 0 28px', fontWeight: 500, letterSpacing: '-0.02em' }}>
         {concept.label}
@@ -4552,7 +4552,7 @@ function LessonView({ conceptId, onStart, onBack }) {
       {lesson.sections && lesson.sections.map((s, i) => (
         <section key={i} style={{ marginBottom: 40 }}>
           <div className="mono accent" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: 10 }}>
-            Â§ {String(i + 1).padStart(2, '0')}
+            § {String(i + 1).padStart(2, '0')}
           </div>
           <h2 className="display" style={{ fontSize: 24, fontWeight: 500, margin: '0 0 16px', letterSpacing: '-0.01em', lineHeight: 1.25 }}>
             {s.heading}
@@ -4563,7 +4563,7 @@ function LessonView({ conceptId, onStart, onBack }) {
           {s.example && (
             <div style={{ marginTop: 20, padding: '18px 22px', background: 'var(--accent-soft)', borderLeft: '3px solid var(--accent)', maxWidth: 680 }}>
               <div className="mono accent" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: 8 }}>
-                Example Â· {s.example.title}
+                Example · {s.example.title}
               </div>
               <div style={{ fontSize: 14, lineHeight: 1.65, whiteSpace: 'pre-wrap' }}>
                 {s.example.body}
@@ -4598,12 +4598,12 @@ function LessonView({ conceptId, onStart, onBack }) {
       {lesson.tips && lesson.tips.length > 0 && (
         <section style={{ marginBottom: 40 }}>
           <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: 14, color: 'var(--accent)' }}>
-            â¦ Exam tips
+            ✦ Exam tips
           </div>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {lesson.tips.map((t, i) => (
               <li key={i} style={{ display: 'flex', gap: 14, paddingLeft: 4 }}>
-                <span className="accent" style={{ fontSize: 13, paddingTop: 2 }}>â</span>
+                <span className="accent" style={{ fontSize: 13, paddingTop: 2 }}>→</span>
                 <span style={{ lineHeight: 1.6, fontSize: 14 }}>{t}</span>
               </li>
             ))}
@@ -4613,7 +4613,7 @@ function LessonView({ conceptId, onStart, onBack }) {
 
       <div className="rule" style={{ margin: '8px 0 32px' }} />
 
-      {/* Key points â condensed summary */}
+      {/* Key points — condensed summary */}
       <section style={{ marginBottom: 32 }}>
         <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: 14 }}>Key points to remember</div>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -4628,7 +4628,7 @@ function LessonView({ conceptId, onStart, onBack }) {
 
       {/* Traps */}
       <section style={{ marginBottom: 32 }}>
-        <div className="mono" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: 14, color: 'var(--wrong)' }}>â  Exam traps</div>
+        <div className="mono" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: 14, color: 'var(--wrong)' }}>⚠ Exam traps</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {lesson.traps.map((t, i) => (
             <div
@@ -4650,9 +4650,9 @@ function LessonView({ conceptId, onStart, onBack }) {
       <div className="rule" style={{ margin: '8px 0 24px' }} />
 
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-        <button className="btn primary" onClick={onStart}>Start Quiz Â· {questionCount} Qs â</button>
+        <button className="btn primary" onClick={onStart}>Start Quiz · {questionCount} Qs →</button>
         <span className="mono faint" style={{ fontSize: 11, letterSpacing: '0.1em' }}>
-          You can leave any time â progress is saved
+          You can leave any time — progress is saved
         </span>
       </div>
     </div>
@@ -4726,21 +4726,21 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
       const timeMin = Math.floor(timeUsed / 60);
       const timeSec = timeUsed % 60;
       if (pct >= 95) {
-        verdict = 'PASS Â· Exam-ready';
+        verdict = 'PASS · Exam-ready';
         verdictColor = 'var(--correct)';
         verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s. This is comfortably above the 85% pass bar with margin for exam-day nerves. Take the Scrum.org Open Assessment once more at 100%, then book the real exam.`;
       } else if (passed) {
         verdict = 'PASS';
         verdictColor = 'var(--correct)';
-        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s â above the 85% pass bar (68/80 needed). You'd pass the real exam at this level, but you don't have much margin. Review your missed questions and aim for 90%+ before booking.`;
+        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s — above the 85% pass bar (68/80 needed). You'd pass the real exam at this level, but you don't have much margin. Review your missed questions and aim for 90%+ before booking.`;
       } else if (pct >= 75) {
-        verdict = 'FAIL Â· Close';
+        verdict = 'FAIL · Close';
         verdictColor = 'var(--accent)';
-        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s. Below the 85% pass bar but close. Review your missed questions â if most were brutal-phrased or scenarios, you need more practice on those specifically. Try the Mock Exam again in a few days.`;
+        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s. Below the 85% pass bar but close. Review your missed questions — if most were brutal-phrased or scenarios, you need more practice on those specifically. Try the Mock Exam again in a few days.`;
       } else {
         verdict = 'FAIL';
         verdictColor = 'var(--wrong)';
-        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s â well below the 85% pass bar. Don't book the real exam yet. Go back to concept lessons for your weakest areas, grind the review queue, and retry the Mock Exam when you're consistently hitting 85%+ on concept quizzes.`;
+        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s — well below the 85% pass bar. Don't book the real exam yet. Go back to concept lessons for your weakest areas, grind the review queue, and retry the Mock Exam when you're consistently hitting 85%+ on concept quizzes.`;
       }
     } else if (pct >= 95) {
       verdict = 'Exam-ready';
@@ -4751,7 +4751,7 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
     } else if (pct >= 85) {
       verdict = 'Above the pass bar';
       verdictColor = 'var(--accent)';
-      verdictDetail = 'You\'d pass the real exam (85% pass mark). To push into the 95%+ range, focus on the harder phrasings and multi-paragraph scenarios â those are where high scores are won or lost.';
+      verdictDetail = 'You\'d pass the real exam (85% pass mark). To push into the 95%+ range, focus on the harder phrasings and multi-paragraph scenarios — those are where high scores are won or lost.';
     } else if (pct >= 70) {
       verdict = 'Close to passing';
       verdictColor = 'var(--accent-dim)';
@@ -4764,7 +4764,7 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
     return (
       <div className="container-max fade-in">
         <div className="mono faint" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16 }}>
-          {isMock ? 'â Mock Exam Â· Results' : 'Quiz Â· Results'}
+          {isMock ? '◉ Mock Exam · Results' : 'Quiz · Results'}
         </div>
         <h1 className="display" style={{ fontSize: 'clamp(36px, 6vw, 56px)', fontWeight: 500, margin: '0 0 8px', letterSpacing: '-0.02em', color: verdictColor }}>
           {verdict}
@@ -4791,11 +4791,11 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
                 <div style={{ color: 'var(--text-dim)', fontSize: 13, lineHeight: 1.6 }}>
                   <div style={{ display: 'flex', gap: 12, marginBottom: 4 }}>
                     <span className="mono accent" style={{ minWidth: 70, fontSize: 12 }}>95%+ here</span>
-                    <span>â comfortable pass on the real exam (85-90%).</span>
+                    <span>≈ comfortable pass on the real exam (85-90%).</span>
                   </div>
                   <div style={{ display: 'flex', gap: 12, marginBottom: 4 }}>
                     <span className="mono" style={{ minWidth: 70, fontSize: 12, color: 'var(--accent-dim)' }}>87% here</span>
-                    <span>â risky. You'd be near the pass bar, not past it.</span>
+                    <span>≈ risky. You'd be near the pass bar, not past it.</span>
                   </div>
                   <div style={{ display: 'flex', gap: 12 }}>
                     <span className="mono" style={{ minWidth: 70, fontSize: 12, color: 'var(--wrong)' }}>&lt;85% here</span>
@@ -4906,7 +4906,7 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
     return (
       <div className="container-max fade-in">
         <div className="mono faint" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16 }}>
-          â Mock Exam Â· Submit
+          ◉ Mock Exam · Submit
         </div>
         <h1 className="display" style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 500, margin: '0 0 24px', letterSpacing: '-0.02em' }}>
           Ready to submit?
@@ -4929,7 +4929,7 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
         </div>
         <p style={{ fontSize: 14, lineHeight: 1.6, maxWidth: 560, color: 'var(--text-dim)', marginBottom: 24 }}>
           Submitting will score your exam against the 85% pass bar. You won't be able to change answers after this.
-          {unanswered > 0 && ` You still have ${unanswered} unanswered question${unanswered === 1 ? '' : 's'} â they'll count as wrong.`}
+          {unanswered > 0 && ` You still have ${unanswered} unanswered question${unanswered === 1 ? '' : 's'} — they'll count as wrong.`}
         </p>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <button className="btn primary" onClick={finalizeMockExam}>Submit Exam</button>
@@ -4949,13 +4949,13 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
   return (
     <div className="container-max fade-in" key={q.id}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
-        <button className="btn ghost" onClick={() => onBack(false)}>{isMock ? 'â Abandon' : 'â Exit'}</button>
+        <button className="btn ghost" onClick={() => onBack(false)}>{isMock ? '← Abandon' : '← Exit'}</button>
         {isMock ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
             <div className="mono" style={{ fontSize: 11, letterSpacing: '0.12em', color: 'var(--text-dim)' }}>
               <span className="numeric" style={{ color: 'var(--text)' }}>{String(idx + 1).padStart(2, '0')}</span>
               <span> / {String(questions.length).padStart(2, '0')}</span>
-              <span style={{ margin: '0 12px' }}>Â·</span>
+              <span style={{ margin: '0 12px' }}>·</span>
               <span className="numeric" style={{ color: 'var(--accent)' }}>{answeredCount}</span>
               <span> answered</span>
             </div>
@@ -4969,14 +4969,14 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
               letterSpacing: '0.1em',
               color: timerCritical ? 'var(--wrong)' : timerWarning ? 'var(--accent)' : 'var(--text)',
             }}>
-              â± {mockTimeMin}:{String(mockTimeSec).padStart(2, '0')}
+              ⏱ {mockTimeMin}:{String(mockTimeSec).padStart(2, '0')}
             </div>
           </div>
         ) : (
           <div className="mono faint" style={{ fontSize: 11, letterSpacing: '0.12em' }}>
             <span className="numeric" style={{ color: 'var(--text)' }}>{String(idx + 1).padStart(2, '0')}</span>
             <span> / {String(questions.length).padStart(2, '0')}</span>
-            <span style={{ margin: '0 12px' }}>Â·</span>
+            <span style={{ margin: '0 12px' }}>·</span>
             <span style={{ color: 'var(--correct)' }}>{sessionCorrect}</span>
             <span> correct</span>
           </div>
@@ -4985,18 +4985,18 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
 
       <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16 }}>
         {CONCEPTS.find((c) => c.id === q.concept)?.label}
-        <span style={{ margin: '0 10px' }}>Â·</span>
+        <span style={{ margin: '0 10px' }}>·</span>
         {q.type === 'tf' ? 'True / False' : selectCount === 1 ? 'Single answer' : `Choose ${selectCount}`}
         {!isMock && q.difficulty === 'brutal' && (
           <>
-            <span style={{ margin: '0 10px' }}>Â·</span>
-            <span style={{ color: 'var(--wrong)', letterSpacing: '0.2em' }}>â BRUTAL</span>
+            <span style={{ margin: '0 10px' }}>·</span>
+            <span style={{ color: 'var(--wrong)', letterSpacing: '0.2em' }}>⚔ BRUTAL</span>
           </>
         )}
         {!isMock && q.difficulty === 'scenario' && (
           <>
-            <span style={{ margin: '0 10px' }}>Â·</span>
-            <span style={{ color: 'var(--accent)', letterSpacing: '0.2em' }}>â SCENARIO</span>
+            <span style={{ margin: '0 10px' }}>·</span>
+            <span style={{ color: 'var(--accent)', letterSpacing: '0.2em' }}>◆ SCENARIO</span>
           </>
         )}
       </div>
@@ -5051,11 +5051,11 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
       {isMock ? (
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           <button className="btn" onClick={prev} disabled={idx === 0}>
-            â Previous
+            ← Previous
           </button>
           {idx + 1 < questions.length ? (
             <button className="btn primary" onClick={next}>
-              Next â
+              Next →
             </button>
           ) : (
             <button className="btn primary" onClick={() => setConfirmSubmit(true)} style={{ borderColor: 'var(--accent)', color: 'var(--bg)', background: 'var(--accent)' }}>
@@ -5089,7 +5089,7 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
       {revealed && !isMock && (
         <div className="fade-in" style={{ marginTop: 24 }}>
           <div className={`chip ${wasCorrect ? 'correct' : 'wrong'}`} style={{ marginBottom: 14 }}>
-            {wasCorrect ? 'â Correct' : 'â Not quite'}
+            {wasCorrect ? '✓ Correct' : '✗ Not quite'}
           </div>
 
           <div className="card" style={{ borderLeft: `3px solid ${wasCorrect ? 'var(--correct)' : 'var(--wrong)'}` }}>
@@ -5123,7 +5123,7 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
 
           <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
             <button className="btn primary" onClick={next}>
-              {idx + 1 >= questions.length ? 'Finish' : 'Next â'}
+              {idx + 1 >= questions.length ? 'Finish' : 'Next →'}
             </button>
           </div>
         </div>
@@ -5159,7 +5159,7 @@ function StatsView({ progress, onBack, onReset }) {
 
   return (
     <div className="container-max fade-in">
-      <button className="btn ghost" onClick={onBack} style={{ marginBottom: 24 }}>â Back</button>
+      <button className="btn ghost" onClick={onBack} style={{ marginBottom: 24 }}>← Back</button>
 
       <h1 className="display" style={{ fontSize: 'clamp(30px, 5vw, 42px)', fontWeight: 500, margin: '0 0 24px', letterSpacing: '-0.02em' }}>Your progress</h1>
 
@@ -5168,7 +5168,7 @@ function StatsView({ progress, onBack, onReset }) {
           ['Questions seen', `${seen} / ${allQids.length}`],
           ['Questions mastered', `${masteredQs} / ${allQids.length}`],
           ['Total answered', progress.totalAnswered],
-          ['Overall accuracy', progress.totalAnswered > 0 ? `${Math.round((progress.totalCorrect / progress.totalAnswered) * 100)}%` : 'â'],
+          ['Overall accuracy', progress.totalAnswered > 0 ? `${Math.round((progress.totalCorrect / progress.totalAnswered) * 100)}%` : '—'],
         ].map(([label, val]) => (
           <div key={label} className="card" style={{ padding: 20 }}>
             <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.16em', marginBottom: 8 }}>{label}</div>
@@ -5186,14 +5186,14 @@ function StatsView({ progress, onBack, onReset }) {
               <div style={{ flex: 1 }}>
                 <div className="display" style={{ fontSize: 17, fontWeight: 500 }}>{c.label}</div>
                 <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.14em' }}>
-                  {m.level} Â· {m.totalAnswered} answered
+                  {m.level} · {m.totalAnswered} answered
                 </div>
               </div>
               <div style={{ width: 140, height: 4, background: 'var(--border)', position: 'relative' }}>
                 <div style={{ position: 'absolute', inset: 0, width: `${Math.round(m.coverage * 100)}%`, background: 'var(--accent)' }} />
               </div>
               <div className="mono" style={{ fontSize: 11, color: 'var(--text-dim)', minWidth: 40, textAlign: 'right' }}>
-                {m.totalAnswered > 0 ? `${Math.round(m.accuracy * 100)}%` : 'â'}
+                {m.totalAnswered > 0 ? `${Math.round(m.accuracy * 100)}%` : '—'}
               </div>
             </div>
           );
@@ -5223,15 +5223,15 @@ function StatsView({ progress, onBack, onReset }) {
       </div>
 
       <div className="mono faint" style={{ fontSize: 10, letterSpacing: '0.14em', textAlign: 'center' }}>
-        Progress stored in this browser Â· not synced
+        Progress stored in this browser · not synced
       </div>
     </div>
   );
 }
 
-/* ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+/* ──────────────────────────────────────────────────────────────────────────
    APP ROOT
-   ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+   ────────────────────────────────────────────────────────────────────────── */
 
 export default function App() {
   const [view, setView] = useState('home');
@@ -5296,7 +5296,7 @@ export default function App() {
   }
 
   function startMockExam() {
-    // 80 questions drawn to reflect the real PSPO I weighting â
+    // 80 questions drawn to reflect the real PSPO I weighting —
     // mostly standard difficulty with a realistic mix of harder phrasings.
     const standards = QUESTIONS.filter((q) => !q.difficulty);
     const brutals = QUESTIONS.filter((q) => q.difficulty === 'brutal');
@@ -5347,7 +5347,7 @@ export default function App() {
     return (
       <div className="pspo-root grainy" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <style>{STYLE}</style>
-        <div className="mono faint" style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loadingâ¦</div>
+        <div className="mono faint" style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading…</div>
       </div>
     );
   }
@@ -5392,7 +5392,7 @@ export default function App() {
           <p className="dim" style={{ fontSize: 16, maxWidth: 540, marginTop: 0 }}>
             Questions you've answered incorrectly, or haven't yet answered correctly twice. Closer to real mastery than one-shot accuracy.
           </p>
-          <button className="btn primary" onClick={startReview} style={{ marginTop: 16 }}>Start Review â</button>
+          <button className="btn primary" onClick={startReview} style={{ marginTop: 16 }}>Start Review →</button>
         </div>
       )}
 
