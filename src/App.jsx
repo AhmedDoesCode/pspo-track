@@ -4778,13 +4778,13 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
       const timeMin = Math.floor(timeUsed / 60);
       const timeSec = timeUsed % 60;
       if (pct >= 95) {
-        verdict = 'PASS · Exam-ready';
+        verdict = 'PASS · Perfect Score';
         verdictColor = 'var(--correct)';
-        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s. This is comfortably above the 85% pass bar with margin for exam-day nerves. Take the Scrum.org Open Assessment once more at 100%, then book the real exam.`;
+        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s. This is comfortably above the 85% pass bar with margin for exam-day nerves. Take the Scrum.org Open Assessment once more at 100% before booking the real exam.`;
       } else if (passed) {
         verdict = 'PASS';
         verdictColor = 'var(--correct)';
-        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s — above the 85% pass bar (68/80 needed). You'd pass the real exam at this level, but you don't have much margin. Review your missed questions and aim for 90%+ before booking.`;
+        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s — above the 85% pass bar (68/80 needed). You're above the threshold, but there isn't much margin. Review your missed questions and aim for 90%+ before booking.`;
       } else if (pct >= 75) {
         verdict = 'FAIL · Close';
         verdictColor = 'var(--accent)';
@@ -4795,15 +4795,15 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
         verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s — well below the 85% pass bar. Don't book the real exam yet. Go back to concept lessons for your weakest areas, grind the review queue, and retry the Mock Exam when you're consistently hitting 85%+ on concept quizzes.`;
       }
     } else if (pct >= 95) {
-      verdict = 'Exam-ready';
+      verdict = 'Strong Result';
       verdictColor = 'var(--correct)';
       verdictDetail = hardRatio > 0.3
-        ? 'You\'re parsing adversarial phrasings and scenario judgment calls consistently. Pair this with the Scrum.org Open Assessment at 100% and you\'re in the 95%+ range on the real exam.'
+        ? 'You\'re parsing adversarial phrasings and scenario judgment calls consistently. Pair this with the Scrum.org Open Assessment at 100% before attempting the real exam.'
         : 'Strong accuracy. Keep at it on the harder phrasings and scenario questions mixed into each concept.';
     } else if (pct >= 85) {
-      verdict = 'Above the pass bar';
+      verdict = 'Above the Pass Bar';
       verdictColor = 'var(--accent)';
-      verdictDetail = 'You\'d pass the real exam (85% pass mark). To push into the 95%+ range, focus on the harder phrasings and multi-paragraph scenarios — those are where high scores are won or lost.';
+      verdictDetail = 'You\'re above the 85% threshold. To build more confidence, focus on the harder phrasings and multi-paragraph scenarios — those are where high scores are won or lost.';
     } else if (pct >= 70) {
       verdict = 'Close to passing';
       verdictColor = 'var(--accent-dim)';
