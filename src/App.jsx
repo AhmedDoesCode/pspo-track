@@ -4659,7 +4659,17 @@ function LessonView({ conceptId, onStart, onBack }) {
   );
 }
 
-function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) {
+function defangBrutalQuestion(text) {
+  return text.replace(/\b[A-Z]{3,}\b/g, (w) => w.toLowerCase());
+}
+
+function QuizView({ questions: questionsProp, phases, progress, onComplete, onBack, mode, conceptId }) {
+  const [phaseIdx, setPhaseIdx] = useState(0);
+  const [phaseTransition, setPhaseTransition] = useState(false);
+
+  // Derive active question list from phases or direct prop
+  const questions = phases ? phases[phaseIdx].questions : (questionsProp || []);
+
   const [idx, setIdx] = useState(0);
   const [selected, setSelected] = useState([]);
   const [revealed, setRevealed] = useState(false);
@@ -4865,8 +4875,11 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
   function next() {
     if (idx + 1 >= questions.length) {
       if (isMock) {
-        // Don't auto-submit; show confirm screen
         setConfirmSubmit(true);
+        return;
+      }
+      if (phases && phaseIdx < phases.length - 1) {
+        setPhaseTransition(true);
         return;
       }
       setFinished(true);
@@ -4874,8 +4887,16 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
     }
     setIdx(idx + 1);
     const nextQ = questions[idx + 1];
-    // In mock mode, restore previously-chosen answer if any
     setSelected(isMock ? (mockAnswers[nextQ.id] || []) : []);
+    setRevealed(false);
+    setWasCorrect(null);
+  }
+
+  function advancePhase() {
+    setPhaseIdx((p) => p + 1);
+    setPhaseTransition(false);
+    setIdx(0);
+    setSelected([]);
     setRevealed(false);
     setWasCorrect(null);
   }
@@ -4895,6 +4916,37 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
     setSelected(isMock ? (mockAnswers[target.id] || []) : []);
     setRevealed(false);
     setWasCorrect(null);
+  }
+
+  // Phase transition screen
+  if (phases && phaseTransition) {
+    const nextPhase = phases[phaseIdx + 1];
+    const doneTotal = sessionCorrect + sessionWrong;
+    const phasesCompleted = phaseIdx + 1;
+    return (
+      <div className="container-max fade-in">
+        <div className="mono faint" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 24 }}>
+          Phase {phasesCompleted} of {phases.length} complete
+        </div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginBottom: 32 }}>
+          <div className="numeric display" style={{ fontSize: 56, lineHeight: 1, color: 'var(--accent)' }}>
+            {doneTotal > 0 ? Math.round((sessionCorrect / doneTotal) * 100) : 0}%
+          </div>
+          <div className="mono dim" style={{ fontSize: 13 }}>so far · {sessionCorrect}/{doneTotal} correct</div>
+        </div>
+        <div className="rule" style={{ margin: '0 0 32px' }} />
+        <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 12 }}>
+          Up next · Phase {phasesCompleted + 1} of {phases.length}
+        </div>
+        <h1 className="display" style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 500, margin: '0 0 10px', letterSpacing: '-0.02em' }}>
+          {nextPhase.name}
+        </h1>
+        <p className="dim" style={{ fontSize: 15, maxWidth: 480, margin: '0 0 32px', lineHeight: 1.55 }}>
+          {nextPhase.subtitle} · {nextPhase.questions.length} question{nextPhase.questions.length !== 1 ? 's' : ''}
+        </p>
+        <button className="btn primary" onClick={advancePhase}>Start phase {phasesCompleted + 1} →</button>
+      </div>
+    );
   }
 
   // Mock-exam confirm-submit interstitial
@@ -4974,6 +5026,12 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
           </div>
         ) : (
           <div className="mono faint" style={{ fontSize: 11, letterSpacing: '0.12em' }}>
+            {phases && (
+              <>
+                <span style={{ color: 'var(--accent)' }}>Phase {phaseIdx + 1}/{phases.length}</span>
+                <span style={{ margin: '0 10px' }}>·</span>
+              </>
+            )}
             <span className="numeric" style={{ color: 'var(--text)' }}>{String(idx + 1).padStart(2, '0')}</span>
             <span> / {String(questions.length).padStart(2, '0')}</span>
             <span style={{ margin: '0 12px' }}>·</span>
@@ -5019,7 +5077,7 @@ function QuizView({ questions, progress, onComplete, onBack, mode, conceptId }) 
       )}
 
       <h2 className="display" style={{ fontSize: 'clamp(22px, 3.2vw, 28px)', lineHeight: 1.35, fontWeight: 500, margin: '0 0 28px', letterSpacing: '-0.01em' }}>
-        {q.q}
+        {q.difficulty === 'brutal' ? defangBrutalQuestion(q.q) : q.q}
       </h2>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
@@ -5237,6 +5295,7 @@ export default function App() {
   const [view, setView] = useState('home');
   const [activeConcept, setActiveConcept] = useState(null);
   const [quizSet, setQuizSet] = useState(null);
+  const [quizPhases, setQuizPhases] = useState(null);
   const [quizMode, setQuizMode] = useState('mixed');
   const [progress, setProgress] = useState(DEFAULT_PROGRESS);
   const [loaded, setLoaded] = useState(false);
@@ -5280,9 +5339,26 @@ export default function App() {
 
   function startQuizForConcept(conceptId) {
     const qs = QUESTIONS.filter((q) => q.concept === conceptId);
-    // Shuffle for variety
-    const shuffled = [...qs].sort(() => Math.random() - 0.5);
-    setQuizSet(shuffled);
+    const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+    const phases = [
+      {
+        name: 'Core Questions',
+        subtitle: 'Recall and comprehension',
+        questions: shuffle(qs.filter((q) => !q.difficulty)),
+      },
+      {
+        name: 'Scenario Questions',
+        subtitle: 'Applied judgment in context',
+        questions: shuffle(qs.filter((q) => q.difficulty === 'scenario')),
+      },
+      {
+        name: 'Brutal Questions',
+        subtitle: 'Adversarial phrasing — no capitalization hints',
+        questions: shuffle(qs.filter((q) => q.difficulty === 'brutal')),
+      },
+    ].filter((p) => p.questions.length > 0);
+    setQuizSet(null);
+    setQuizPhases(phases);
     setQuizMode('concept');
     setView('quiz');
   }
@@ -5339,6 +5415,7 @@ export default function App() {
   function exitQuiz() {
     setView('home');
     setQuizSet(null);
+    setQuizPhases(null);
     setActiveConcept(null);
     setQuizMode('mixed');
   }
@@ -5375,9 +5452,10 @@ export default function App() {
         />
       )}
 
-      {view === 'quiz' && quizSet && (
+      {view === 'quiz' && (quizSet || quizPhases) && (
         <QuizView
           questions={quizSet}
+          phases={quizPhases}
           progress={progress}
           onComplete={updateAnswer}
           onBack={exitQuiz}
