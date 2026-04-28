@@ -4389,6 +4389,40 @@ function MasteryDots({ coverage, questionCount }) {
   );
 }
 
+function PhaseProgressBar({ phases, phaseIdx, questionIdx }) {
+  const phaseColors = ['var(--correct)', 'var(--accent)', 'var(--wrong)'];
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+      {phases.map((phase, pIdx) => {
+        const color = phaseColors[pIdx % phaseColors.length];
+        const isPast = pIdx < phaseIdx;
+        const isCurrent = pIdx === phaseIdx;
+        const isFuture = pIdx > phaseIdx;
+        return (
+          <React.Fragment key={pIdx}>
+            {pIdx > 0 && <div style={{ width: 16, height: 1, background: 'var(--border-hi)', flexShrink: 0 }} />}
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+              {phase.questions.map((_, qIdx) => {
+                const isDone = isPast || (isCurrent && qIdx < questionIdx);
+                const isNow = isCurrent && qIdx === questionIdx;
+                return (
+                  <div key={qIdx} style={{
+                    width: 6, height: 6, borderRadius: '50%',
+                    background: isDone || isNow ? color : 'transparent',
+                    border: `1.5px solid ${isFuture ? 'var(--border-hi)' : color}`,
+                    opacity: isFuture ? 0.25 : isNow ? 1 : isDone ? 0.75 : 0.35,
+                    boxShadow: isNow ? `0 0 0 2px ${color}40` : 'none',
+                  }} />
+                );
+              })}
+            </div>
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
 function Header({ stats, onNav, currentView }) {
   return (
     <header style={{ borderBottom: '1px solid var(--border)', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
@@ -4515,6 +4549,13 @@ function HomeView({ progress, onPickConcept, onStartReview, onStartQuick, onStar
           })}
         </div>
       </section>
+
+      <div className="rule" style={{ margin: '48px 0 24px' }} />
+      <p className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 12 }}>Disclaimer</p>
+      <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--text-faint)', maxWidth: 640, margin: 0 }}>
+        PSPO·I Trainer is an independent study tool not affiliated with, endorsed by, or officially associated with Scrum.org or any of its subsidiaries. Use of this application does not guarantee success on the Professional Scrum Product Owner I (PSPO I) assessment, nor does it confer any certification or credential. The PSPO I is an official Scrum.org assessment — candidates are encouraged to study the 2020 Scrum Guide and consult all official learning resources available at{' '}
+        <span style={{ color: 'var(--text-dim)' }}>scrum.org</span> before attempting the assessment.
+      </p>
     </div>
   );
 }
@@ -5040,6 +5081,8 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
           </div>
         )}
       </div>
+
+      {phases && <PhaseProgressBar phases={phases} phaseIdx={phaseIdx} questionIdx={idx} />}
 
       <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16 }}>
         {CONCEPTS.find((c) => c.id === q.concept)?.label}
