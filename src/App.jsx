@@ -4778,40 +4778,40 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
       const timeMin = Math.floor(timeUsed / 60);
       const timeSec = timeUsed % 60;
       if (pct >= 95) {
-        verdict = 'PASS · Perfect Score';
+        verdict = 'Perfect Score';
         verdictColor = 'var(--correct)';
-        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s. This is comfortably above the 85% pass bar with margin for exam-day nerves. Take the Scrum.org Open Assessment once more at 100% before booking the real exam.`;
+        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s. Comfortably above the 85% bar with margin for exam-day nerves. Take the Scrum.org Open Assessment once more at 100% before booking.`;
       } else if (passed) {
-        verdict = 'PASS';
+        verdict = 'Pass';
         verdictColor = 'var(--correct)';
-        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s — above the 85% pass bar (68/80 needed). You're above the threshold, but there isn't much margin. Review your missed questions and aim for 90%+ before booking.`;
+        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s — above the 85% bar (68/80 needed). Not much margin though. Review your missed questions and aim for 90%+ before booking.`;
       } else if (pct >= 75) {
-        verdict = 'FAIL · Close';
+        verdict = 'Almost There';
         verdictColor = 'var(--accent)';
-        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s. Below the 85% pass bar but close. Review your missed questions — if most were brutal-phrased or scenarios, you need more practice on those specifically. Try the Mock Exam again in a few days.`;
+        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s. Below the 85% bar but close. Review your missed questions — if most were brutal or scenario questions, focus practice there specifically.`;
       } else {
-        verdict = 'FAIL';
+        verdict = 'Fail';
         verdictColor = 'var(--wrong)';
-        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s — well below the 85% pass bar. Don't book the real exam yet. Go back to concept lessons for your weakest areas, grind the review queue, and retry the Mock Exam when you're consistently hitting 85%+ on concept quizzes.`;
+        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s — below the 85% bar. Go back to concept lessons for your weakest areas, work through the review queue, and retry when you're consistently hitting 85%+ on concept quizzes.`;
       }
     } else if (pct >= 95) {
-      verdict = 'Strong Result';
+      verdict = 'Perfect Score';
       verdictColor = 'var(--correct)';
       verdictDetail = hardRatio > 0.3
         ? 'You\'re parsing adversarial phrasings and scenario judgment calls consistently. Pair this with the Scrum.org Open Assessment at 100% before attempting the real exam.'
         : 'Strong accuracy. Keep at it on the harder phrasings and scenario questions mixed into each concept.';
     } else if (pct >= 85) {
-      verdict = 'Above the Pass Bar';
-      verdictColor = 'var(--accent)';
-      verdictDetail = 'You\'re above the 85% threshold. To build more confidence, focus on the harder phrasings and multi-paragraph scenarios — those are where high scores are won or lost.';
+      verdict = 'Pass';
+      verdictColor = 'var(--correct)';
+      verdictDetail = 'Above the 85% threshold. To build more confidence, focus on the harder phrasings and multi-paragraph scenarios — those are where high scores are won or lost.';
     } else if (pct >= 70) {
-      verdict = 'Close to passing';
-      verdictColor = 'var(--accent-dim)';
-      verdictDetail = 'You have the concepts. The gap is usually one of two things: adversarial phrasings catching you on weasel words (primary, best, first, always, except), or scenario questions where you\'re picking the most decisive option instead of the one that preserves self-management.';
+      verdict = 'Almost There';
+      verdictColor = 'var(--accent)';
+      verdictDetail = 'You have the concepts. The gap is usually adversarial phrasings catching you on weasel words (primary, best, first, always, except), or scenario questions where you\'re picking the most decisive option instead of the one that preserves self-management.';
     } else {
-      verdict = 'Back to the lessons';
+      verdict = 'Fail';
       verdictColor = 'var(--wrong)';
-      verdictDetail = 'Score suggests there are concepts you haven\'t internalized yet. Start with the lesson for whichever concept came up most in your misses, then retry the quiz.';
+      verdictDetail = 'Some concepts haven\'t fully landed yet. Start with the lesson for whichever concept came up most in your misses, then retry the quiz.';
     }
     return (
       <div className="container-max fade-in">
