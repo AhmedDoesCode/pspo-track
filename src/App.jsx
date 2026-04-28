@@ -4405,12 +4405,13 @@ function PhaseProgressBar({ phases, phaseIdx, questionIdx }) {
               {phase.questions.map((_, qIdx) => {
                 const isDone = isPast || (isCurrent && qIdx < questionIdx);
                 const isNow = isCurrent && qIdx === questionIdx;
+                const opacity = isFuture ? 0.3 : isNow ? 1 : isDone ? 0.8 : 0.45;
                 return (
                   <div key={qIdx} style={{
                     width: 6, height: 6, borderRadius: '50%',
                     background: isDone || isNow ? color : 'transparent',
-                    border: `1.5px solid ${isFuture ? 'var(--border-hi)' : color}`,
-                    opacity: isFuture ? 0.25 : isNow ? 1 : isDone ? 0.75 : 0.35,
+                    border: `1.5px solid ${color}`,
+                    opacity,
                     boxShadow: isNow ? `0 0 0 2px ${color}40` : 'none',
                   }} />
                 );
