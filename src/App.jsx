@@ -4406,10 +4406,17 @@ function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bo
         const offset = allPhases.slice(0, pIdx).reduce((s, p) => s + p.questions.length, 0);
         const isCurrent = hasPhases ? pIdx === phaseIdx : pIdx === 0;
         const isFuture = hasPhases ? pIdx > phaseIdx : false;
+        const phaseIcon = (() => {
+          const d = phase.questions[0]?.difficulty;
+          if (d === 'brutal') return { icon: '✕', color: 'var(--wrong)' };
+          if (d === 'scenario') return { icon: '▲', color: 'var(--accent)' };
+          return { icon: '●', color: 'var(--correct)' };
+        })();
+
         return (
           <React.Fragment key={pIdx}>
-            {pIdx > 0 && <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--border-hi)', flexShrink: 0, opacity: 0.5 }} />}
             <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ color: phaseIcon.color, fontSize: 9, flexShrink: 0, marginRight: 2, opacity: isFuture ? 0.7 : 1 }}>{phaseIcon.icon}</span>
               {phase.questions.map((q, qIdx) => {
                 const globalIndex = offset + qIdx;
                 const isNow = isCurrent && qIdx === questionIdx;
@@ -5196,14 +5203,7 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
         />
       )}
 
-      <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0 }}>
-        {!isMock && (
-          q.difficulty === 'scenario'
-            ? <span style={{ color: 'var(--accent)', marginRight: 8, fontSize: 10 }}>▲</span>
-            : q.difficulty === 'brutal'
-            ? <span style={{ color: 'var(--wrong)', marginRight: 8, fontSize: 10 }}>✕</span>
-            : <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: 'var(--correct)', marginRight: 8, flexShrink: 0 }} />
-        )}
+      <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16 }}>
         {CONCEPTS.find((c) => c.id === q.concept)?.label}
         <span style={{ margin: '0 10px' }}>·</span>
         {q.type === 'tf' ? 'True / False' : selectCount === 1 ? 'Single answer' : `Choose ${selectCount}`}
