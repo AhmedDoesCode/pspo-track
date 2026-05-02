@@ -4390,7 +4390,7 @@ function MasteryDots({ coverage, questionCount }) {
   );
 }
 
-function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bookmarked = new Set(), skipped = new Set(), answered = new Set(), onJumpTo }) {
+function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bookmarked = new Set(), skipped = new Set(), answered = new Map(), onJumpTo }) {
   const allPhases = phases || (flatQuestions ? [{ questions: flatQuestions }] : []);
   const hasPhases = !!phases;
 
@@ -4414,9 +4414,11 @@ function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bo
                 const globalIndex = offset + qIdx;
                 const isNow = isCurrent && qIdx === questionIdx;
                 const isDone = answered.has(globalIndex);
+                const wasCorrect = answered.get(globalIndex);
                 const isBookmarked = bookmarked.has(globalIndex);
                 const isSkipped = skipped.has(globalIndex);
                 const color = dotColor(q);
+                const fillColor = isDone ? (wasCorrect ? color : 'var(--wrong)') : 'transparent';
                 const label = globalIndex + 1;
                 const twoDigit = label >= 10;
                 const h = isNow ? 18 : 14;
@@ -4425,13 +4427,13 @@ function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bo
                 return (
                   <button
                     key={qIdx}
-                    title={`Q${label}${isSkipped ? ' · skipped' : ''}${isBookmarked ? ' · bookmarked' : ''}`}
+                    title={`Q${label}${isSkipped ? ' · skipped' : ''}${isBookmarked ? ' · bookmarked' : ''}${isDone ? (wasCorrect ? ' · correct' : ' · wrong') : ''}`}
                     onClick={() => onJumpTo(globalIndex)}
                     style={{
                       height: h, minWidth: minW, padding: '0 3px',
                       borderRadius: 3,
-                      background: isDone ? color : 'transparent',
-                      border: `${isBookmarked ? 2 : 1.5}px solid ${isBookmarked ? 'var(--accent)' : isNow ? color : 'var(--border-hi)'}`,
+                      background: fillColor,
+                      border: `${isBookmarked ? 2 : 1.5}px solid ${isBookmarked ? 'var(--accent)' : isNow ? color : isDone ? (wasCorrect ? color : 'var(--wrong)') : 'var(--border-hi)'}`,
                       color: isDone ? 'var(--bg)' : isNow ? color : 'var(--text-faint)',
                       fontSize: isNow ? 9 : 8,
                       fontFamily: 'var(--font-mono)', fontWeight: 700,
@@ -4755,7 +4757,7 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
   const [finished, setFinished] = useState(false);
   const [bookmarked, setBookmarked] = useState(new Set());
   const [skipped, setSkipped] = useState(new Set());
-  const [answered, setAnswered] = useState(new Set());
+  const [answered, setAnswered] = useState(new Map()); // globalIdx -> true (correct) | false (wrong)
 
   // Mock-exam-only state: answers recorded but not scored until submission, plus a timer
   const isMock = mode === 'mock';
@@ -4951,7 +4953,7 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
     setWasCorrect(correct);
     setRevealed(true);
     if (!answered.has(globalIdx)) {
-      setAnswered((prev) => { const n = new Set(prev); n.add(globalIdx); return n; });
+      setAnswered((prev) => { const n = new Map(prev); n.set(globalIdx, correct); return n; });
       if (correct) setSessionCorrect((x) => x + 1); else setSessionWrong((x) => x + 1);
       onComplete(q.id, correct);
     }
