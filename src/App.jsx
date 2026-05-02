@@ -4541,7 +4541,7 @@ function HomeView({ progress, onPickConcept, onStartReview, onStartQuick, onStar
         </p>
 
         <div style={{ display: 'flex', gap: 12, marginTop: 32, flexWrap: 'wrap' }}>
-          <button className="btn primary" onClick={onStartQuick}>Quick Quiz · 10 random</button>
+          <button className="btn primary" onClick={onStartQuick}>◎ Quick Quiz · 20 Qs · 10 min</button>
           <button className="btn" onClick={onStartMock} style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}>
             ◉ Mock Exam · 80 Qs · 60 min
           </button>
@@ -4783,9 +4783,10 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
   const [answered, setAnswered] = useState(new Map()); // globalIdx -> true (correct) | false (wrong)
 
   // Mock-exam-only state: answers recorded but not scored until submission, plus a timer
-  const isMock = mode === 'mock';
+  const isMock = mode === 'mock' || mode === 'quick';
+  const timeLimit = mode === 'mock' ? 60 * 60 : 10 * 60;
   const [mockAnswers, setMockAnswers] = useState({}); // qid -> selected[]
-  const [mockTimeLeft, setMockTimeLeft] = useState(60 * 60); // 60 min in seconds
+  const [mockTimeLeft, setMockTimeLeft] = useState(timeLimit);
   const [mockStartedAt] = useState(() => Date.now());
   const [confirmSubmit, setConfirmSubmit] = useState(false);
 
@@ -4794,7 +4795,7 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
     if (!isMock || finished) return;
     const interval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - mockStartedAt) / 1000);
-      const remaining = Math.max(0, 60 * 60 - elapsed);
+      const remaining = Math.max(0, timeLimit - elapsed);
       setMockTimeLeft(remaining);
       if (remaining <= 0) {
         finalizeMockExam();
@@ -4836,7 +4837,7 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
     if (isMock) {
       // Real PSPO I pass bar: 85% (68/80)
       const passed = pct >= 85;
-      const timeUsed = 60 * 60 - mockTimeLeft;
+      const timeUsed = timeLimit - mockTimeLeft;
       const timeMin = Math.floor(timeUsed / 60);
       const timeSec = timeUsed % 60;
       if (pct >= 95) {
@@ -4878,7 +4879,7 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
     return (
       <div className="container-max fade-in">
         <div className="mono faint" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16 }}>
-          {isMock ? '◉ Mock Exam · Results' : 'Quiz · Results'}
+          {mode === 'mock' ? '◉ Mock Exam · Results' : mode === 'quick' ? '◎ Quick Quiz · Results' : 'Quiz · Results'}
         </div>
         <h1 className="display" style={{ fontSize: 'clamp(36px, 6vw, 56px)', fontWeight: 500, margin: '0 0 8px', letterSpacing: '-0.02em', color: verdictColor }}>
           {verdict}
@@ -4893,7 +4894,7 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
           {verdictDetail}
         </p>
 
-        {isMock && (
+        {mode === 'mock' && (
           <div className="card" style={{ borderLeft: '3px solid var(--accent)', marginBottom: 32, maxWidth: 680 }}>
             <div className="mono accent" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: 12 }}>
               Honest calibration
@@ -5132,8 +5133,8 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
   // Mock-exam timer formatting
   const mockTimeMin = Math.floor(mockTimeLeft / 60);
   const mockTimeSec = mockTimeLeft % 60;
-  const timerWarning = isMock && mockTimeLeft < 10 * 60; // Last 10 minutes
-  const timerCritical = isMock && mockTimeLeft < 5 * 60; // Last 5 minutes
+  const timerWarning = isMock && mockTimeLeft < timeLimit * 0.25;
+  const timerCritical = isMock && mockTimeLeft < timeLimit * 0.1;
   const answeredCount = isMock ? Object.keys(mockAnswers).length : 0;
 
   return (
@@ -5516,10 +5517,15 @@ export default function App() {
   }
 
   function startQuickQuiz() {
-    const shuffled = [...QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 10);
-    setQuizSet(shuffled);
+    const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+    const picked = [
+      ...shuffle(QUESTIONS.filter((q) => !q.difficulty)).slice(0, 14),
+      ...shuffle(QUESTIONS.filter((q) => q.difficulty === 'brutal')).slice(0, 4),
+      ...shuffle(QUESTIONS.filter((q) => q.difficulty === 'scenario')).slice(0, 2),
+    ].sort(() => Math.random() - 0.5);
+    setQuizSet(picked);
     setActiveConcept(null);
-    setQuizMode('mixed');
+    setQuizMode('quick');
     setView('quiz');
   }
 
