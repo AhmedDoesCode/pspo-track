@@ -4390,36 +4390,46 @@ function MasteryDots({ coverage, questionCount }) {
 }
 
 function PhaseProgressBar({ phases, phaseIdx, questionIdx }) {
-  const phaseColors = ['var(--correct)', 'var(--accent)', 'var(--wrong)'];
+  const phaseColor = (phase) => {
+    const d = phase.questions[0]?.difficulty;
+    if (d === 'brutal') return 'var(--wrong)';
+    if (d === 'scenario') return 'var(--accent)';
+    return 'var(--correct)';
+  };
+
+  const dotStyle = (phase, qIdx, pIdx) => {
+    const d = phase.questions[0]?.difficulty;
+    const color = phaseColor(phase);
+    const isPast = pIdx < phaseIdx;
+    const isCurrent = pIdx === phaseIdx;
+    const isFuture = pIdx > phaseIdx;
+    const isDone = isPast || (isCurrent && qIdx < questionIdx);
+    const isNow = isCurrent && qIdx === questionIdx;
+    const size = isNow ? 11 : 7;
+    const opacity = isFuture ? 0.2 : isDone ? 0.55 : isNow ? 1 : 0.2;
+    const base = {
+      width: size, height: size,
+      background: color,
+      opacity,
+      flexShrink: 0,
+      transition: 'width 0.15s, height 0.15s',
+      boxShadow: isNow ? `0 0 0 3px ${color}50` : 'none',
+    };
+    if (d === 'scenario') return { ...base, clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)' };
+    if (d === 'brutal') return { ...base, clipPath: 'polygon(20% 0%,50% 30%,80% 0%,100% 20%,70% 50%,100% 80%,80% 100%,50% 70%,20% 100%,0% 80%,30% 50%,0% 20%)' };
+    return { ...base, borderRadius: '50%' };
+  };
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
-      {phases.map((phase, pIdx) => {
-        const color = phaseColors[pIdx % phaseColors.length];
-        const isPast = pIdx < phaseIdx;
-        const isCurrent = pIdx === phaseIdx;
-        const isFuture = pIdx > phaseIdx;
-        return (
-          <React.Fragment key={pIdx}>
-            {pIdx > 0 && <div style={{ width: 16, height: 1, background: 'var(--border-hi)', flexShrink: 0 }} />}
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
-              {phase.questions.map((_, qIdx) => {
-                const isDone = isPast || (isCurrent && qIdx < questionIdx);
-                const isNow = isCurrent && qIdx === questionIdx;
-                const opacity = isFuture ? 0.3 : isNow ? 1 : isDone ? 0.8 : 0.45;
-                return (
-                  <div key={qIdx} style={{
-                    width: 6, height: 6, borderRadius: '50%',
-                    background: isDone || isNow ? color : 'transparent',
-                    border: `1.5px solid ${color}`,
-                    opacity,
-                    boxShadow: isNow ? `0 0 0 2px ${color}40` : 'none',
-                  }} />
-                );
-              })}
-            </div>
-          </React.Fragment>
-        );
-      })}
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+      {phases.map((phase, pIdx) => (
+        <React.Fragment key={pIdx}>
+          {pIdx > 0 && <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--border-hi)', flexShrink: 0, opacity: 0.5 }} />}
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+            {phase.questions.map((_, qIdx) => <div key={qIdx} style={dotStyle(phase, qIdx, pIdx)} />)}
+          </div>
+        </React.Fragment>
+      ))}
     </div>
   );
 }
@@ -5074,8 +5084,17 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
                 <span style={{ margin: '0 10px' }}>·</span>
               </>
             )}
-            <span className="numeric" style={{ color: 'var(--text)' }}>{String(idx + 1).padStart(2, '0')}</span>
-            <span> / {String(questions.length).padStart(2, '0')}</span>
+            {phases ? (
+              <>
+                <span className="numeric" style={{ color: 'var(--text)' }}>{String(phases.slice(0, phaseIdx).reduce((s, p) => s + p.questions.length, 0) + idx + 1).padStart(2, '0')}</span>
+                <span> / {String(phases.reduce((s, p) => s + p.questions.length, 0)).padStart(2, '0')}</span>
+              </>
+            ) : (
+              <>
+                <span className="numeric" style={{ color: 'var(--text)' }}>{String(idx + 1).padStart(2, '0')}</span>
+                <span> / {String(questions.length).padStart(2, '0')}</span>
+              </>
+            )}
             <span style={{ margin: '0 12px' }}>·</span>
             <span style={{ color: 'var(--correct)' }}>{sessionCorrect}</span>
             <span> correct</span>
