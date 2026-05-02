@@ -4390,7 +4390,7 @@ function MasteryDots({ coverage, questionCount }) {
   );
 }
 
-function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bookmarked = new Set(), skipped = new Set(), onJumpTo }) {
+function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bookmarked = new Set(), skipped = new Set(), answered = new Set(), onJumpTo }) {
   const allPhases = phases || (flatQuestions ? [{ questions: flatQuestions }] : []);
   const hasPhases = !!phases;
 
@@ -4404,7 +4404,6 @@ function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bo
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>
       {allPhases.map((phase, pIdx) => {
         const offset = allPhases.slice(0, pIdx).reduce((s, p) => s + p.questions.length, 0);
-        const isPast = hasPhases ? pIdx < phaseIdx : false;
         const isCurrent = hasPhases ? pIdx === phaseIdx : pIdx === 0;
         const isFuture = hasPhases ? pIdx > phaseIdx : false;
         return (
@@ -4414,56 +4413,37 @@ function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bo
               {phase.questions.map((q, qIdx) => {
                 const globalIndex = offset + qIdx;
                 const isNow = isCurrent && qIdx === questionIdx;
-                const isDone = isPast || (isCurrent && qIdx < questionIdx);
+                const isDone = answered.has(globalIndex);
                 const isBookmarked = bookmarked.has(globalIndex);
                 const isSkipped = skipped.has(globalIndex);
                 const color = dotColor(q);
                 const label = globalIndex + 1;
-
-                if (isBookmarked) {
-                  return (
-                    <button
-                      key={qIdx}
-                      title={`Q${label}${isSkipped ? ' · skipped' : ''}`}
-                      onClick={() => onJumpTo(globalIndex)}
-                      style={{
-                        height: 16, minWidth: label >= 10 ? 20 : 16, padding: '0 3px',
-                        borderRadius: 3,
-                        background: isDone || isNow ? color : 'transparent',
-                        border: `1.5px solid ${color}`,
-                        color: isDone || isNow ? 'var(--bg)' : color,
-                        fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 700, lineHeight: '13px',
-                        cursor: 'pointer',
-                        opacity: isFuture ? 0.45 : 1,
-                        boxShadow: isNow ? `0 0 0 2px ${color}50` : 'none',
-                        flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                      }}
-                    >
-                      {label}
-                    </button>
-                  );
-                }
-
-                const size = isNow ? 11 : 7;
-                const opacity = isFuture ? 0.2 : isSkipped ? 0.45 : isDone ? 0.55 : isNow ? 1 : 0.2;
-                const st = {
-                  width: size, height: size, background: color, opacity,
-                  flexShrink: 0, transition: 'width 0.15s, height 0.15s',
-                  boxShadow: isNow ? `0 0 0 3px ${color}50` : 'none',
-                  cursor: 'pointer',
-                };
-                const d = q?.difficulty;
-                if (d === 'scenario') st.clipPath = 'polygon(50% 0%, 100% 100%, 0% 100%)';
-                else if (d === 'brutal') st.clipPath = 'polygon(20% 0%,50% 30%,80% 0%,100% 20%,70% 50%,100% 80%,80% 100%,50% 70%,20% 100%,0% 80%,30% 50%,0% 20%)';
-                else st.borderRadius = '50%';
+                const twoDigit = label >= 10;
+                const h = isNow ? 18 : 14;
+                const minW = twoDigit ? (isNow ? 23 : 19) : (isNow ? 19 : 15);
 
                 return (
-                  <div
+                  <button
                     key={qIdx}
-                    title={`Q${label}${isSkipped ? ' · skipped' : ''}`}
+                    title={`Q${label}${isSkipped ? ' · skipped' : ''}${isBookmarked ? ' · bookmarked' : ''}`}
                     onClick={() => onJumpTo(globalIndex)}
-                    style={st}
-                  />
+                    style={{
+                      height: h, minWidth: minW, padding: '0 3px',
+                      borderRadius: 3,
+                      background: isDone ? color : 'transparent',
+                      border: `${isBookmarked ? 2 : 1.5}px solid ${isBookmarked ? 'var(--accent)' : isNow ? color : 'var(--border-hi)'}`,
+                      color: isDone ? 'var(--bg)' : isNow ? color : 'var(--text-faint)',
+                      fontSize: isNow ? 9 : 8,
+                      fontFamily: 'var(--font-mono)', fontWeight: 700,
+                      cursor: 'pointer',
+                      opacity: isFuture && !isBookmarked && !isNow ? 0.4 : isSkipped && !isDone ? 0.6 : 1,
+                      boxShadow: isNow ? `0 0 0 2px ${color}40` : isBookmarked ? `0 0 0 1.5px var(--accent)60` : 'none',
+                      flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                      transition: 'height 0.1s, min-width 0.1s',
+                    }}
+                  >
+                    {label}
+                  </button>
                 );
               })}
             </div>
@@ -5191,6 +5171,7 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
           questionIdx={idx}
           bookmarked={bookmarked}
           skipped={skipped}
+          answered={answered}
           onJumpTo={jumpToGlobal}
         />
       )}
