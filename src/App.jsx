@@ -4425,9 +4425,9 @@ function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bo
 
                 let bg, borderCol, textCol;
                 if (isBookmarked) {
-                  bg = isNow ? 'var(--accent)' : 'rgba(232,168,56,0.15)';
+                  bg = isNow ? 'var(--accent)' : 'rgba(232,168,56,0.35)';
                   borderCol = 'var(--accent)';
-                  textCol = isNow ? 'var(--bg)' : 'var(--accent)';
+                  textCol = isNow ? 'var(--bg)' : '#e8a838';
                 } else if (isDone) {
                   bg = wasCorrect ? '#2c6e2c' : '#7a2c2c';
                   borderCol = bg;
@@ -4438,8 +4438,8 @@ function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bo
                   textCol = color;
                 } else {
                   bg = 'transparent';
-                  borderCol = 'var(--border-hi)';
-                  textCol = 'var(--text-dim)';
+                  borderCol = 'var(--text-dim)';
+                  textCol = 'var(--text)';
                 }
 
                 return (
@@ -4456,7 +4456,7 @@ function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bo
                       fontSize: isNow ? 9 : 8,
                       fontFamily: 'var(--font-mono)', fontWeight: 700,
                       cursor: 'pointer',
-                      opacity: isFuture && !isBookmarked && !isNow ? 0.45 : 1,
+                      opacity: isFuture && !isBookmarked && !isNow ? 0.7 : 1,
                       boxShadow: isNow ? `0 0 0 2px ${isBookmarked ? 'rgba(232,168,56,0.4)' : color + '40'}` : isBookmarked ? '0 0 0 1px rgba(232,168,56,0.35)' : 'none',
                       flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                       transition: 'height 0.1s, min-width 0.1s',
