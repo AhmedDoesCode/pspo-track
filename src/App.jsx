@@ -5170,17 +5170,10 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
                 <span style={{ margin: '0 10px' }}>·</span>
               </>
             )}
-            {phases ? (
-              <>
-                <span className="numeric" style={{ color: 'var(--text)' }}>{String(phases.slice(0, phaseIdx).reduce((s, p) => s + p.questions.length, 0) + idx + 1).padStart(2, '0')}</span>
-                <span> / {String(phases.reduce((s, p) => s + p.questions.length, 0)).padStart(2, '0')}</span>
-              </>
-            ) : (
-              <>
-                <span className="numeric" style={{ color: 'var(--text)' }}>{String(idx + 1).padStart(2, '0')}</span>
-                <span> / {String(questions.length).padStart(2, '0')}</span>
-              </>
-            )}
+            <>
+              <span className="numeric" style={{ color: 'var(--text)' }}>{String(answered.size).padStart(2, '0')}</span>
+              <span> / {String(phases ? phases.reduce((s, p) => s + p.questions.length, 0) : questions.length).padStart(2, '0')}</span>
+            </>
             <span style={{ margin: '0 12px' }}>·</span>
             <span style={{ color: 'var(--correct)' }}>{sessionCorrect}</span>
             <span> correct</span>
