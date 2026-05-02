@@ -4159,12 +4159,13 @@ function masteryForConcept(progress, conceptId) {
   const accuracy = weightedAnswered > 0 ? weightedCorrect / weightedAnswered : 0;
   const hardAccuracy = hardAnswered > 0 ? hardCorrect / hardAnswered : 0;
   // Raw counts for display
-  let totalAnswered = 0, totalCorrect = 0;
+  let totalAnswered = 0, totalCorrect = 0, uniqueCorrect = 0;
   for (const q of qs) {
     const p = progress.questions[q.id];
     if (!p) continue;
     totalAnswered += p.attempts || 0;
     totalCorrect += p.correctCount || 0;
+    if ((p.correctCount || 0) > 0) uniqueCorrect++;
   }
   let level = 'unseen';
   if (totalAnswered === 0) level = 'unseen';
@@ -4172,7 +4173,7 @@ function masteryForConcept(progress, conceptId) {
   else if (coverage >= 0.8 && accuracy >= 0.85 && (hardCount === 0 || hardAccuracy >= 0.8)) level = 'mastered';
   else if (coverage >= 0.5 && accuracy >= 0.6) level = 'practicing';
   else level = 'learning';
-  return { level, coverage, accuracy, totalAnswered, totalCorrect, questionCount: qs.length, brutalCount: hardCount, brutalAnswered: hardAnswered, brutalAccuracy: hardAccuracy };
+  return { level, coverage, accuracy, totalAnswered, totalCorrect, uniqueCorrect, questionCount: qs.length, brutalCount: hardCount, brutalAnswered: hardAnswered, brutalAccuracy: hardAccuracy };
 }
 
 function arraysEqualAsSet(a, b) {
@@ -4551,8 +4552,12 @@ function HomeView({ progress, onPickConcept, onStartReview, onStartQuick, onStar
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <MasteryDots coverage={m.coverage} questionCount={m.questionCount} />
-                  <span className="mono faint" style={{ fontSize: 10, letterSpacing: '0.1em' }}>
-                    {m.totalAnswered > 0 ? `${Math.round(m.accuracy * 100)}% · ${m.totalAnswered}` : `${m.questionCount} Qs`}
+                  <span className="mono" style={{
+                    fontSize: 10, letterSpacing: '0.1em',
+                    color: m.uniqueCorrect === m.questionCount && m.questionCount > 0 ? 'var(--correct)' : m.uniqueCorrect > 0 ? 'var(--text-dim)' : 'var(--text-faint)',
+                  }}>
+                    <span style={{ color: m.uniqueCorrect > 0 ? 'var(--text)' : undefined }}>{m.uniqueCorrect}</span>
+                    {' / '}{m.questionCount} correct
                   </span>
                 </div>
               </button>
