@@ -4463,7 +4463,7 @@ function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bo
                       fontSize: isNow ? 9 : 8,
                       fontFamily: 'var(--font-mono)', fontWeight: 700,
                       cursor: 'pointer',
-                      opacity: isFuture && !isBookmarked && !isNow ? 0.7 : 1,
+                      opacity: !isDone && !isNow && !isBookmarked ? 0.7 : 1,
                       boxShadow: isNow ? `0 0 0 2px ${isBookmarked ? 'rgba(232,168,56,0.4)' : color + '40'}` : isBookmarked ? '0 0 0 1px rgba(232,168,56,0.35)' : 'none',
                       flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                       transition: 'height 0.1s, min-width 0.1s',
