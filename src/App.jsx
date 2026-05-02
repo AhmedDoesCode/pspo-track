@@ -4390,47 +4390,86 @@ function MasteryDots({ coverage, questionCount }) {
   );
 }
 
-function PhaseProgressBar({ phases, phaseIdx, questionIdx }) {
-  const phaseColor = (phase) => {
-    const d = phase.questions[0]?.difficulty;
-    if (d === 'brutal') return 'var(--wrong)';
-    if (d === 'scenario') return 'var(--accent)';
+function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bookmarked = new Set(), skipped = new Set(), onJumpTo }) {
+  const allPhases = phases || (flatQuestions ? [{ questions: flatQuestions }] : []);
+  const hasPhases = !!phases;
+
+  const dotColor = (q) => {
+    if (q?.difficulty === 'brutal') return 'var(--wrong)';
+    if (q?.difficulty === 'scenario') return 'var(--accent)';
     return 'var(--correct)';
   };
 
-  const dotStyle = (phase, qIdx, pIdx) => {
-    const d = phase.questions[0]?.difficulty;
-    const color = phaseColor(phase);
-    const isPast = pIdx < phaseIdx;
-    const isCurrent = pIdx === phaseIdx;
-    const isFuture = pIdx > phaseIdx;
-    const isDone = isPast || (isCurrent && qIdx < questionIdx);
-    const isNow = isCurrent && qIdx === questionIdx;
-    const size = isNow ? 11 : 7;
-    const opacity = isFuture ? 0.2 : isDone ? 0.55 : isNow ? 1 : 0.2;
-    const base = {
-      width: size, height: size,
-      background: color,
-      opacity,
-      flexShrink: 0,
-      transition: 'width 0.15s, height 0.15s',
-      boxShadow: isNow ? `0 0 0 3px ${color}50` : 'none',
-    };
-    if (d === 'scenario') return { ...base, clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)' };
-    if (d === 'brutal') return { ...base, clipPath: 'polygon(20% 0%,50% 30%,80% 0%,100% 20%,70% 50%,100% 80%,80% 100%,50% 70%,20% 100%,0% 80%,30% 50%,0% 20%)' };
-    return { ...base, borderRadius: '50%' };
-  };
-
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-      {phases.map((phase, pIdx) => (
-        <React.Fragment key={pIdx}>
-          {pIdx > 0 && <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--border-hi)', flexShrink: 0, opacity: 0.5 }} />}
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
-            {phase.questions.map((_, qIdx) => <div key={qIdx} style={dotStyle(phase, qIdx, pIdx)} />)}
-          </div>
-        </React.Fragment>
-      ))}
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>
+      {allPhases.map((phase, pIdx) => {
+        const offset = allPhases.slice(0, pIdx).reduce((s, p) => s + p.questions.length, 0);
+        const isPast = hasPhases ? pIdx < phaseIdx : false;
+        const isCurrent = hasPhases ? pIdx === phaseIdx : pIdx === 0;
+        const isFuture = hasPhases ? pIdx > phaseIdx : false;
+        return (
+          <React.Fragment key={pIdx}>
+            {pIdx > 0 && <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--border-hi)', flexShrink: 0, opacity: 0.5 }} />}
+            <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'center' }}>
+              {phase.questions.map((q, qIdx) => {
+                const globalIndex = offset + qIdx;
+                const isNow = isCurrent && qIdx === questionIdx;
+                const isDone = isPast || (isCurrent && qIdx < questionIdx);
+                const isBookmarked = bookmarked.has(globalIndex);
+                const isSkipped = skipped.has(globalIndex);
+                const color = dotColor(q);
+                const label = globalIndex + 1;
+
+                if (isBookmarked) {
+                  return (
+                    <button
+                      key={qIdx}
+                      title={`Q${label}${isSkipped ? ' · skipped' : ''}`}
+                      onClick={() => onJumpTo(globalIndex)}
+                      style={{
+                        height: 16, minWidth: label >= 10 ? 20 : 16, padding: '0 3px',
+                        borderRadius: 3,
+                        background: isDone || isNow ? color : 'transparent',
+                        border: `1.5px solid ${color}`,
+                        color: isDone || isNow ? 'var(--bg)' : color,
+                        fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 700, lineHeight: '13px',
+                        cursor: 'pointer',
+                        opacity: isFuture ? 0.45 : 1,
+                        boxShadow: isNow ? `0 0 0 2px ${color}50` : 'none',
+                        flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                      }}
+                    >
+                      {label}
+                    </button>
+                  );
+                }
+
+                const size = isNow ? 11 : 7;
+                const opacity = isFuture ? 0.2 : isSkipped ? 0.45 : isDone ? 0.55 : isNow ? 1 : 0.2;
+                const st = {
+                  width: size, height: size, background: color, opacity,
+                  flexShrink: 0, transition: 'width 0.15s, height 0.15s',
+                  boxShadow: isNow ? `0 0 0 3px ${color}50` : 'none',
+                  cursor: 'pointer',
+                };
+                const d = q?.difficulty;
+                if (d === 'scenario') st.clipPath = 'polygon(50% 0%, 100% 100%, 0% 100%)';
+                else if (d === 'brutal') st.clipPath = 'polygon(20% 0%,50% 30%,80% 0%,100% 20%,70% 50%,100% 80%,80% 100%,50% 70%,20% 100%,0% 80%,30% 50%,0% 20%)';
+                else st.borderRadius = '50%';
+
+                return (
+                  <div
+                    key={qIdx}
+                    title={`Q${label}${isSkipped ? ' · skipped' : ''}`}
+                    onClick={() => onJumpTo(globalIndex)}
+                    style={st}
+                  />
+                );
+              })}
+            </div>
+          </React.Fragment>
+        );
+      })}
     </div>
   );
 }
@@ -4734,6 +4773,9 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
   const [sessionCorrect, setSessionCorrect] = useState(0);
   const [sessionWrong, setSessionWrong] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [bookmarked, setBookmarked] = useState(new Set());
+  const [skipped, setSkipped] = useState(new Set());
+  const [answered, setAnswered] = useState(new Set());
 
   // Mock-exam-only state: answers recorded but not scored until submission, plus a timer
   const isMock = mode === 'mock';
@@ -4900,6 +4942,9 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
     );
   }
 
+  const globalOffset = phases ? phases.slice(0, phaseIdx).reduce((s, p) => s + p.questions.length, 0) : 0;
+  const globalIdx = globalOffset + idx;
+
   const selectCount = q.selectCount || (q.type === 'multi' ? q.correct.length : 1);
   const canSubmit = selected.length === selectCount;
 
@@ -4925,8 +4970,11 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
     const correct = arraysEqualAsSet(selected, q.correct);
     setWasCorrect(correct);
     setRevealed(true);
-    if (correct) setSessionCorrect((x) => x + 1); else setSessionWrong((x) => x + 1);
-    onComplete(q.id, correct);
+    if (!answered.has(globalIdx)) {
+      setAnswered((prev) => { const n = new Set(prev); n.add(globalIdx); return n; });
+      if (correct) setSessionCorrect((x) => x + 1); else setSessionWrong((x) => x + 1);
+      onComplete(q.id, correct);
+    }
   }
 
   function next() {
@@ -4967,12 +5015,40 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
     setWasCorrect(null);
   }
 
-  function jumpTo(i) {
-    setIdx(i);
-    const target = questions[i];
-    setSelected(isMock ? (mockAnswers[target.id] || []) : []);
+  function jumpToGlobal(globalIndex) {
+    setSelected([]);
     setRevealed(false);
     setWasCorrect(null);
+    if (!phases) {
+      setIdx(globalIndex);
+      return;
+    }
+    let rem = globalIndex;
+    for (let p = 0; p < phases.length; p++) {
+      if (rem < phases[p].questions.length) {
+        if (p !== phaseIdx) { setPhaseIdx(p); setPhaseTransition(false); }
+        setIdx(rem);
+        return;
+      }
+      rem -= phases[p].questions.length;
+    }
+  }
+
+  function skipQuestion() {
+    setSkipped((prev) => { const n = new Set(prev); n.add(globalIdx); return n; });
+    if (idx + 1 >= questions.length) {
+      if (phases && phaseIdx < phases.length - 1) { setPhaseTransition(true); return; }
+      setFinished(true);
+      return;
+    }
+    setIdx(idx + 1);
+    setSelected([]);
+    setRevealed(false);
+    setWasCorrect(null);
+  }
+
+  function toggleBookmark() {
+    setBookmarked((prev) => { const n = new Set(prev); n.has(globalIdx) ? n.delete(globalIdx) : n.add(globalIdx); return n; });
   }
 
   // Phase transition screen
@@ -5107,7 +5183,17 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
         )}
       </div>
 
-      {phases && <PhaseProgressBar phases={phases} phaseIdx={phaseIdx} questionIdx={idx} />}
+      {!isMock && (
+        <PhaseProgressBar
+          phases={phases}
+          flatQuestions={!phases ? questions : undefined}
+          phaseIdx={phaseIdx}
+          questionIdx={idx}
+          bookmarked={bookmarked}
+          skipped={skipped}
+          onJumpTo={jumpToGlobal}
+        />
+      )}
 
       <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16 }}>
         {CONCEPTS.find((c) => c.id === q.concept)?.label}
@@ -5199,13 +5285,19 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
         </div>
       ) : (
         !revealed && (
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-            <button className="btn primary" onClick={submit} disabled={!canSubmit}>
-              Submit
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            <button className="btn primary" onClick={submit} disabled={!canSubmit}>Submit</button>
+            <button className="btn ghost" onClick={skipQuestion} style={{ fontSize: 12 }}>Skip →</button>
+            <button
+              className="btn ghost"
+              onClick={toggleBookmark}
+              style={{ fontSize: 13, color: bookmarked.has(globalIdx) ? 'var(--accent)' : undefined, borderColor: bookmarked.has(globalIdx) ? 'var(--accent)' : undefined }}
+            >
+              {bookmarked.has(globalIdx) ? '★' : '☆'}
             </button>
-            {selectCount > 1 && !revealed && (
+            {selectCount > 1 && (
               <span className="mono faint" style={{ fontSize: 11, letterSpacing: '0.1em' }}>
-                Selected {selected.length} / {selectCount}
+                {selected.length} / {selectCount} selected
               </span>
             )}
           </div>
@@ -5247,7 +5339,14 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
             )}
           </div>
 
-          <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+          <div style={{ marginTop: 24, display: 'flex', gap: 10, justifyContent: 'flex-end', alignItems: 'center' }}>
+            <button
+              className="btn ghost"
+              onClick={toggleBookmark}
+              style={{ fontSize: 13, color: bookmarked.has(globalIdx) ? 'var(--accent)' : undefined, borderColor: bookmarked.has(globalIdx) ? 'var(--accent)' : undefined }}
+            >
+              {bookmarked.has(globalIdx) ? '★' : '☆'}
+            </button>
             <button className="btn primary" onClick={next}>
               {idx + 1 >= questions.length ? 'Finish' : 'Next →'}
             </button>
