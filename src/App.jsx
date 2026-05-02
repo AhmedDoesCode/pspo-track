@@ -4418,11 +4418,29 @@ function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bo
                 const isBookmarked = bookmarked.has(globalIndex);
                 const isSkipped = skipped.has(globalIndex);
                 const color = dotColor(q);
-                const fillColor = isDone ? (wasCorrect ? color : 'var(--wrong)') : 'transparent';
                 const label = globalIndex + 1;
                 const twoDigit = label >= 10;
                 const h = isNow ? 18 : 14;
                 const minW = twoDigit ? (isNow ? 23 : 19) : (isNow ? 19 : 15);
+
+                let bg, borderCol, textCol;
+                if (isBookmarked) {
+                  bg = isNow ? 'var(--accent)' : 'rgba(232,168,56,0.15)';
+                  borderCol = 'var(--accent)';
+                  textCol = isNow ? 'var(--bg)' : 'var(--accent)';
+                } else if (isDone) {
+                  bg = wasCorrect ? '#2c6e2c' : '#7a2c2c';
+                  borderCol = bg;
+                  textCol = '#fff';
+                } else if (isNow) {
+                  bg = 'transparent';
+                  borderCol = color;
+                  textCol = color;
+                } else {
+                  bg = 'transparent';
+                  borderCol = 'var(--border-hi)';
+                  textCol = 'var(--text-dim)';
+                }
 
                 return (
                   <button
@@ -4432,14 +4450,14 @@ function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bo
                     style={{
                       height: h, minWidth: minW, padding: '0 3px',
                       borderRadius: 3,
-                      background: fillColor,
-                      border: `${isBookmarked ? 2 : 1.5}px solid ${isBookmarked ? 'var(--accent)' : isNow ? color : isDone ? (wasCorrect ? color : 'var(--wrong)') : 'var(--border-hi)'}`,
-                      color: isDone ? 'var(--bg)' : isNow ? color : 'var(--text-faint)',
+                      background: bg,
+                      border: `${isBookmarked ? 2 : 1.5}px solid ${borderCol}`,
+                      color: textCol,
                       fontSize: isNow ? 9 : 8,
                       fontFamily: 'var(--font-mono)', fontWeight: 700,
                       cursor: 'pointer',
-                      opacity: isFuture && !isBookmarked && !isNow ? 0.4 : isSkipped && !isDone ? 0.6 : 1,
-                      boxShadow: isNow ? `0 0 0 2px ${color}40` : isBookmarked ? `0 0 0 1.5px var(--accent)60` : 'none',
+                      opacity: isFuture && !isBookmarked && !isNow ? 0.45 : 1,
+                      boxShadow: isNow ? `0 0 0 2px ${isBookmarked ? 'rgba(232,168,56,0.4)' : color + '40'}` : isBookmarked ? '0 0 0 1px rgba(232,168,56,0.35)' : 'none',
                       flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                       transition: 'height 0.1s, min-width 0.1s',
                     }}
@@ -5178,7 +5196,14 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
         />
       )}
 
-      <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16 }}>
+      <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0 }}>
+        {!isMock && (
+          q.difficulty === 'scenario'
+            ? <span style={{ color: 'var(--accent)', marginRight: 8, fontSize: 10 }}>▲</span>
+            : q.difficulty === 'brutal'
+            ? <span style={{ color: 'var(--wrong)', marginRight: 8, fontSize: 10 }}>✕</span>
+            : <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: 'var(--correct)', marginRight: 8, flexShrink: 0 }} />
+        )}
         {CONCEPTS.find((c) => c.id === q.concept)?.label}
         <span style={{ margin: '0 10px' }}>·</span>
         {q.type === 'tf' ? 'True / False' : selectCount === 1 ? 'Single answer' : `Choose ${selectCount}`}
