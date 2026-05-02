@@ -4401,7 +4401,7 @@ function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bo
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 20, flexWrap: 'wrap', rowGap: 4 }}>
       {allPhases.map((phase, pIdx) => {
         const offset = allPhases.slice(0, pIdx).reduce((s, p) => s + p.questions.length, 0);
         const isCurrent = hasPhases ? pIdx === phaseIdx : pIdx === 0;
@@ -4415,65 +4415,63 @@ function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bo
 
         return (
           <React.Fragment key={pIdx}>
-            <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ color: phaseIcon.color, fontSize: 9, flexShrink: 0, marginRight: 2, opacity: isFuture ? 0.7 : 1 }}>{phaseIcon.icon}</span>
-              {phase.questions.map((q, qIdx) => {
-                const globalIndex = offset + qIdx;
-                const isNow = isCurrent && qIdx === questionIdx;
-                const isDone = answered.has(globalIndex);
-                const wasCorrect = answered.get(globalIndex);
-                const isBookmarked = bookmarked.has(globalIndex);
-                const isSkipped = skipped.has(globalIndex);
-                const color = dotColor(q);
-                const label = globalIndex + 1;
-                const twoDigit = label >= 10;
-                const h = isNow ? 18 : 14;
-                const minW = twoDigit ? (isNow ? 23 : 19) : (isNow ? 19 : 15);
+            <span style={{ color: phaseIcon.color, fontSize: 9, flexShrink: 0, marginLeft: pIdx > 0 ? 4 : 0, marginRight: 3, opacity: isFuture ? 0.7 : 1 }}>{phaseIcon.icon}</span>
+            {phase.questions.map((q, qIdx) => {
+              const globalIndex = offset + qIdx;
+              const isNow = isCurrent && qIdx === questionIdx;
+              const isDone = answered.has(globalIndex);
+              const wasCorrect = answered.get(globalIndex);
+              const isBookmarked = bookmarked.has(globalIndex);
+              const isSkipped = skipped.has(globalIndex);
+              const color = dotColor(q);
+              const label = globalIndex + 1;
+              const twoDigit = label >= 10;
+              const h = isNow ? 18 : 14;
+              const minW = twoDigit ? (isNow ? 23 : 19) : (isNow ? 19 : 15);
 
-                let bg, borderCol, textCol;
-                if (isBookmarked) {
-                  bg = isNow ? 'var(--accent)' : 'rgba(232,168,56,0.35)';
-                  borderCol = 'var(--accent)';
-                  textCol = isNow ? 'var(--bg)' : '#e8a838';
-                } else if (isDone) {
-                  bg = wasCorrect ? '#2c6e2c' : '#7a2c2c';
-                  borderCol = bg;
-                  textCol = '#fff';
-                } else if (isNow) {
-                  bg = 'transparent';
-                  borderCol = color;
-                  textCol = color;
-                } else {
-                  bg = 'transparent';
-                  borderCol = 'var(--text-dim)';
-                  textCol = 'var(--text)';
-                }
+              let bg, borderCol, textCol;
+              if (isBookmarked) {
+                bg = isNow ? 'var(--accent)' : 'rgba(232,168,56,0.35)';
+                borderCol = 'var(--accent)';
+                textCol = isNow ? 'var(--bg)' : '#e8a838';
+              } else if (isDone) {
+                bg = wasCorrect ? '#2c6e2c' : '#7a2c2c';
+                borderCol = color;
+                textCol = '#fff';
+              } else if (isNow) {
+                bg = 'transparent';
+                borderCol = color;
+                textCol = color;
+              } else {
+                bg = 'transparent';
+                borderCol = color;
+                textCol = 'var(--text)';
+              }
 
-                return (
-                  <button
-                    key={qIdx}
-                    title={`Q${label}${isSkipped ? ' · skipped' : ''}${isBookmarked ? ' · bookmarked' : ''}${isDone ? (wasCorrect ? ' · correct' : ' · wrong') : ''}`}
-                    onClick={() => onJumpTo(globalIndex)}
-                    style={{
-                      height: h, minWidth: minW, padding: '0 3px',
-                      borderRadius: 3,
-                      background: bg,
-                      border: `${isBookmarked ? 2 : 1.5}px solid ${borderCol}`,
-                      color: textCol,
-                      fontSize: isNow ? 9 : 8,
-                      fontFamily: 'var(--font-mono)', fontWeight: 700,
-                      cursor: 'pointer',
-                      opacity: !isDone && !isNow && !isBookmarked ? 0.7 : 1,
-                      boxShadow: isNow ? `0 0 0 2px ${isBookmarked ? 'rgba(232,168,56,0.4)' : color + '40'}` : isBookmarked ? '0 0 0 1px rgba(232,168,56,0.35)' : 'none',
-                      flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                      transition: 'height 0.1s, min-width 0.1s',
-                    }}
-                  >
-                    {label}
+              return (
+                <button
+                  key={qIdx}
+                  title={`Q${label}${isSkipped ? ' · skipped' : ''}${isBookmarked ? ' · bookmarked' : ''}${isDone ? (wasCorrect ? ' · correct' : ' · wrong') : ''}`}
+                  onClick={() => onJumpTo(globalIndex)}
+                  style={{
+                    height: h, minWidth: minW, padding: '0 3px',
+                    borderRadius: 3,
+                    background: bg,
+                    border: `${isBookmarked ? 2 : 1.5}px solid ${borderCol}`,
+                    color: textCol,
+                    fontSize: isNow ? 9 : 8,
+                    fontFamily: 'var(--font-mono)', fontWeight: 700,
+                    cursor: 'pointer',
+                    opacity: !isDone && !isNow && !isBookmarked ? 0.7 : 1,
+                    boxShadow: isNow ? `0 0 0 2px ${isBookmarked ? 'rgba(232,168,56,0.4)' : color + '40'}` : isBookmarked ? '0 0 0 1px rgba(232,168,56,0.35)' : 'none',
+                    flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'height 0.1s, min-width 0.1s',
+                  }}
+                >
+                  {label}
                   </button>
                 );
-              })}
-            </div>
+            })}
           </React.Fragment>
         );
       })}
