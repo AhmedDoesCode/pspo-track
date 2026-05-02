@@ -1314,7 +1314,7 @@ const QUESTIONS = [
     explanation: 'The people who do the work estimate the work. The PO is accountable for the Backlog; the Developers are accountable for sizing.',
   },
   {
-    id: 'pb7', concept: 'product_backlog', type: 'single',
+    id: 'pb7', concept: 'product_backlog', type: 'multi', selectCount: 2,
     q: 'If Product Backlog Refinement is needed, when is the ideal time and who should participate?',
     options: [
       { id: 'a', t: 'Business analysts do this 1-2 Sprints ahead of the development Sprints.' },
