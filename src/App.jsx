@@ -5202,21 +5202,7 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
       )}
 
       <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16 }}>
-        {CONCEPTS.find((c) => c.id === q.concept)?.label}
-        <span style={{ margin: '0 10px' }}>·</span>
         {q.type === 'tf' ? 'True / False' : selectCount === 1 ? 'Single answer' : `Choose ${selectCount}`}
-        {!isMock && q.difficulty === 'brutal' && (
-          <>
-            <span style={{ margin: '0 10px' }}>·</span>
-            <span style={{ color: 'var(--wrong)', letterSpacing: '0.2em' }}>⚔ BRUTAL</span>
-          </>
-        )}
-        {!isMock && q.difficulty === 'scenario' && (
-          <>
-            <span style={{ margin: '0 10px' }}>·</span>
-            <span style={{ color: 'var(--accent)', letterSpacing: '0.2em' }}>◆ SCENARIO</span>
-          </>
-        )}
       </div>
 
       {q.context && (
