@@ -4792,6 +4792,22 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
   const [mockAnswers, setMockAnswers] = useState({}); // qid -> selected[]
   // Non-mock session answer memory so navigation can revisit revealed questions without re-recording
   const [sessionAnswers, setSessionAnswers] = useState({}); // qid -> { selected, wasCorrect }
+  // Mock-only ephemeral bookmarks — real-exam style flags scoped to this attempt only
+  const [mockBookmarks, setMockBookmarks] = useState({});
+
+  const effectiveBookmarks = isMock ? mockBookmarks : (progress.bookmarks || {});
+
+  function handleToggleBookmark(qid) {
+    if (isMock) {
+      setMockBookmarks((prev) => {
+        const next = { ...prev };
+        if (next[qid]) delete next[qid]; else next[qid] = true;
+        return next;
+      });
+    } else if (onToggleBookmark) {
+      onToggleBookmark(qid);
+    }
+  }
   const [mockTimeLeft, setMockTimeLeft] = useState(60 * 60); // 60 min in seconds
   const [mockStartedAt] = useState(() => Date.now());
   const [confirmSubmit, setConfirmSubmit] = useState(false);
@@ -5095,7 +5111,7 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
         questionIdx={idx}
         onJump={jumpToPhase}
         answered={isMock ? mockAnswers : sessionAnswers}
-        bookmarks={progress.bookmarks}
+        bookmarks={effectiveBookmarks}
         uniform={!phases}
       />
 
@@ -5138,12 +5154,12 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
         <h2 className="display" style={{ fontSize: 'clamp(22px, 3.2vw, 28px)', lineHeight: 1.35, fontWeight: 500, margin: 0, letterSpacing: '-0.01em', flex: 1 }}>
           {q.difficulty === 'brutal' ? defangBrutalQuestion(q.q) : q.q}
         </h2>
-        {onToggleBookmark && (() => {
-          const bookmarked = !!(progress?.bookmarks && progress.bookmarks[q.id]);
+        {(onToggleBookmark || isMock) && (() => {
+          const bookmarked = !!effectiveBookmarks[q.id];
           return (
             <button
               type="button"
-              onClick={() => onToggleBookmark(q.id)}
+              onClick={() => handleToggleBookmark(q.id)}
               aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark this question'}
               title={bookmarked ? 'Bookmarked — click to remove' : 'Bookmark this question'}
               style={{
