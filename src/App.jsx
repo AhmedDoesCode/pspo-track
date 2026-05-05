@@ -4429,8 +4429,9 @@ function MasteryDots({ coverage, questionCount }) {
   );
 }
 
-function PhaseProgressBar({ phases, phaseIdx, questionIdx, onJump, answered, bookmarks }) {
+function PhaseProgressBar({ phases, phaseIdx, questionIdx, onJump, answered, bookmarks, uniform }) {
   const phaseColor = (phase) => {
+    if (uniform) return 'var(--correct)';
     const d = phase.questions[0]?.difficulty;
     if (d === 'brutal') return 'var(--wrong)';
     if (d === 'scenario') return 'var(--accent)';
@@ -4454,6 +4455,7 @@ function PhaseProgressBar({ phases, phaseIdx, questionIdx, onJump, answered, boo
       boxShadow: isNow ? `0 0 0 3px ${color}50` : 'none',
     };
     if (isBookmarked) return { ...base, clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 50% 70%, 0% 100%)' };
+    if (uniform) return { ...base, borderRadius: '50%' };
     if (d === 'scenario') return { ...base, clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)' };
     if (d === 'brutal') return { ...base, clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' };
     return { ...base, borderRadius: '50%' };
@@ -5087,7 +5089,15 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
         )}
       </div>
 
-      {phases && <PhaseProgressBar phases={phases} phaseIdx={phaseIdx} questionIdx={idx} onJump={jumpToPhase} answered={isMock ? mockAnswers : sessionAnswers} bookmarks={progress.bookmarks} />}
+      <PhaseProgressBar
+        phases={phases || [{ name: 'All', questions }]}
+        phaseIdx={phases ? phaseIdx : 0}
+        questionIdx={idx}
+        onJump={jumpToPhase}
+        answered={isMock ? mockAnswers : sessionAnswers}
+        bookmarks={progress.bookmarks}
+        uniform={!phases}
+      />
 
       {!isMock && (
         <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16 }}>
