@@ -4113,12 +4113,16 @@ const DEFAULT_PROGRESS = {
   totalAnswered: 0,
   totalCorrect: 0,
   sessionsCompleted: 0,
+  bookmarks: {}, // qid -> true
 };
 
 function loadProgress() {
   try {
     const s = localStorage.getItem(STORAGE_KEY);
-    return s ? JSON.parse(s) : DEFAULT_PROGRESS;
+    if (!s) return DEFAULT_PROGRESS;
+    const parsed = JSON.parse(s);
+    if (!parsed.bookmarks) parsed.bookmarks = {};
+    return parsed;
   } catch {
     return DEFAULT_PROGRESS;
   }
@@ -4373,6 +4377,41 @@ const STYLE = `
   .pspo-root .card { padding: 20px; }
   .pspo-root .btn { padding: 10px 16px; font-size: 11px; }
 }
+
+.pspo-dot {
+  position: relative;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  transition: background 0.15s;
+}
+.pspo-dot:hover {
+  background: var(--surface-hi);
+}
+.pspo-dot[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface-on);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 9px;
+  border-radius: 4px;
+  border: 1px solid var(--border-hi);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+  letter-spacing: 0.05em;
+}
 `;
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -4390,88 +4429,56 @@ function MasteryDots({ coverage, questionCount }) {
   );
 }
 
-function PhaseProgressBar({ phases, flatQuestions, phaseIdx = 0, questionIdx, bookmarked = new Set(), skipped = new Set(), answered = new Map(), onJumpTo }) {
-  const allPhases = phases || (flatQuestions ? [{ questions: flatQuestions }] : []);
-  const hasPhases = !!phases;
-
-  const dotColor = (q) => {
-    if (q?.difficulty === 'brutal') return 'var(--wrong)';
-    if (q?.difficulty === 'scenario') return 'var(--accent)';
+function PhaseProgressBar({ phases, phaseIdx, questionIdx, onJump, answered, bookmarks }) {
+  const phaseColor = (phase) => {
+    const d = phase.questions[0]?.difficulty;
+    if (d === 'brutal') return 'var(--wrong)';
+    if (d === 'scenario') return 'var(--accent)';
     return 'var(--correct)';
   };
 
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 20, flexWrap: 'wrap', rowGap: 4 }}>
-      {allPhases.map((phase, pIdx) => {
-        const offset = allPhases.slice(0, pIdx).reduce((s, p) => s + p.questions.length, 0);
-        const isCurrent = hasPhases ? pIdx === phaseIdx : pIdx === 0;
-        const isFuture = hasPhases ? pIdx > phaseIdx : false;
-        const phaseIcon = (() => {
-          const d = phase.questions[0]?.difficulty;
-          if (d === 'brutal') return { icon: '✕', color: 'var(--wrong)' };
-          if (d === 'scenario') return { icon: '▲', color: 'var(--accent)' };
-          return { icon: '●', color: 'var(--correct)' };
-        })();
+  const shapeStyle = (phase, qIdx, pIdx) => {
+    const d = phase.questions[0]?.difficulty;
+    const isCurrent = pIdx === phaseIdx;
+    const isNow = isCurrent && qIdx === questionIdx;
+    const qid = phase.questions[qIdx]?.id;
+    const isAnswered = !!(answered && qid && answered[qid]);
+    const isBookmarked = !!(bookmarks && qid && bookmarks[qid]);
+    const color = isBookmarked ? '#ff8c1a' : phaseColor(phase);
+    const size = isNow ? 11 : 8;
+    const base = {
+      width: size, height: size,
+      background: color,
+      opacity: isNow ? 1 : isAnswered ? 0.85 : isBookmarked ? 0.85 : 0.32,
+      transition: 'width 0.15s, height 0.15s, opacity 0.15s',
+      boxShadow: isNow ? `0 0 0 3px ${color}50` : 'none',
+    };
+    if (isBookmarked) return { ...base, clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 50% 70%, 0% 100%)' };
+    if (d === 'scenario') return { ...base, clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)' };
+    if (d === 'brutal') return { ...base, clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' };
+    return { ...base, borderRadius: '50%' };
+  };
 
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+      {phases.map((phase, pIdx) => {
+        const offset = phases.slice(0, pIdx).reduce((s, p) => s + p.questions.length, 0);
         return (
           <React.Fragment key={pIdx}>
-            <span style={{ color: phaseIcon.color, fontSize: 9, flexShrink: 0, marginLeft: pIdx > 0 ? 4 : 0, marginRight: 3, opacity: isFuture ? 0.7 : 1 }}>{phaseIcon.icon}</span>
-            {phase.questions.map((q, qIdx) => {
-              const globalIndex = offset + qIdx;
-              const isNow = isCurrent && qIdx === questionIdx;
-              const isDone = answered.has(globalIndex);
-              const wasCorrect = answered.get(globalIndex);
-              const isBookmarked = bookmarked.has(globalIndex);
-              const isSkipped = skipped.has(globalIndex);
-              const color = dotColor(q);
-              const label = globalIndex + 1;
-              const twoDigit = label >= 10;
-              const h = isNow ? 18 : 14;
-              const minW = twoDigit ? (isNow ? 23 : 19) : (isNow ? 19 : 15);
-
-              let bg, borderCol, textCol;
-              if (isBookmarked) {
-                bg = isNow ? 'var(--accent)' : 'rgba(232,168,56,0.35)';
-                borderCol = 'var(--accent)';
-                textCol = isNow ? 'var(--bg)' : '#e8a838';
-              } else if (isDone) {
-                bg = wasCorrect ? '#2c6e2c' : '#7a2c2c';
-                borderCol = color;
-                textCol = '#fff';
-              } else if (isNow) {
-                bg = 'transparent';
-                borderCol = color;
-                textCol = color;
-              } else {
-                bg = 'transparent';
-                borderCol = color;
-                textCol = 'var(--text)';
-              }
-
-              return (
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+              {phase.questions.map((_, qIdx) => (
                 <button
                   key={qIdx}
-                  title={`Q${label}${isSkipped ? ' · skipped' : ''}${isBookmarked ? ' · bookmarked' : ''}${isDone ? (wasCorrect ? ' · correct' : ' · wrong') : ''}`}
-                  onClick={() => onJumpTo(globalIndex)}
-                  style={{
-                    height: h, minWidth: minW, padding: '0 3px',
-                    borderRadius: 3,
-                    background: bg,
-                    border: `${isBookmarked ? 2 : 1.5}px solid ${borderCol}`,
-                    color: textCol,
-                    fontSize: isNow ? 9 : 8,
-                    fontFamily: 'var(--font-mono)', fontWeight: 700,
-                    cursor: 'pointer',
-                    opacity: !isDone && !isNow && !isBookmarked ? 0.7 : 1,
-                    boxShadow: isNow ? `0 0 0 2px ${isBookmarked ? 'rgba(232,168,56,0.4)' : color + '40'}` : isBookmarked ? '0 0 0 1px rgba(232,168,56,0.35)' : 'none',
-                    flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                    transition: 'height 0.1s, min-width 0.1s',
-                  }}
+                  type="button"
+                  className="pspo-dot"
+                  data-tip={`Q${offset + qIdx + 1}`}
+                  onClick={onJump ? () => onJump(pIdx, qIdx) : undefined}
+                  aria-label={`Go to question ${offset + qIdx + 1}`}
                 >
-                  {label}
-                  </button>
-                );
-            })}
+                  <div style={shapeStyle(phase, qIdx, pIdx)} />
+                </button>
+              ))}
+            </div>
           </React.Fragment>
         );
       })}
@@ -4541,7 +4548,7 @@ function HomeView({ progress, onPickConcept, onStartReview, onStartQuick, onStar
         </p>
 
         <div style={{ display: 'flex', gap: 12, marginTop: 32, flexWrap: 'wrap' }}>
-          <button className="btn primary" onClick={onStartQuick}>◎ Quick Quiz · 20 Qs · 10 min</button>
+          <button className="btn primary" onClick={onStartQuick}>Quick Quiz · 10 random</button>
           <button className="btn" onClick={onStartMock} style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}>
             ◉ Mock Exam · 80 Qs · 60 min
           </button>
@@ -4764,9 +4771,8 @@ function defangBrutalQuestion(text) {
   return text.replace(/\b[A-Z]{3,}\b/g, (w) => w.toLowerCase());
 }
 
-function QuizView({ questions: questionsProp, phases, progress, onComplete, onBack, mode, conceptId }) {
+function QuizView({ questions: questionsProp, phases, progress, onComplete, onBack, mode, conceptId, onToggleBookmark }) {
   const [phaseIdx, setPhaseIdx] = useState(0);
-  const [phaseTransition, setPhaseTransition] = useState(false);
 
   // Derive active question list from phases or direct prop
   const questions = phases ? phases[phaseIdx].questions : (questionsProp || []);
@@ -4778,15 +4784,13 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
   const [sessionCorrect, setSessionCorrect] = useState(0);
   const [sessionWrong, setSessionWrong] = useState(0);
   const [finished, setFinished] = useState(false);
-  const [bookmarked, setBookmarked] = useState(new Set());
-  const [skipped, setSkipped] = useState(new Set());
-  const [answered, setAnswered] = useState(new Map()); // globalIdx -> true (correct) | false (wrong)
 
   // Mock-exam-only state: answers recorded but not scored until submission, plus a timer
-  const isMock = mode === 'mock' || mode === 'quick';
-  const timeLimit = mode === 'mock' ? 60 * 60 : 10 * 60;
+  const isMock = mode === 'mock';
   const [mockAnswers, setMockAnswers] = useState({}); // qid -> selected[]
-  const [mockTimeLeft, setMockTimeLeft] = useState(timeLimit);
+  // Non-mock session answer memory so navigation can revisit revealed questions without re-recording
+  const [sessionAnswers, setSessionAnswers] = useState({}); // qid -> { selected, wasCorrect }
+  const [mockTimeLeft, setMockTimeLeft] = useState(60 * 60); // 60 min in seconds
   const [mockStartedAt] = useState(() => Date.now());
   const [confirmSubmit, setConfirmSubmit] = useState(false);
 
@@ -4795,7 +4799,7 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
     if (!isMock || finished) return;
     const interval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - mockStartedAt) / 1000);
-      const remaining = Math.max(0, timeLimit - elapsed);
+      const remaining = Math.max(0, 60 * 60 - elapsed);
       setMockTimeLeft(remaining);
       if (remaining <= 0) {
         finalizeMockExam();
@@ -4830,56 +4834,25 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
   if (finished) {
     const total = sessionCorrect + sessionWrong;
     const pct = total > 0 ? Math.round((sessionCorrect / total) * 100) : 0;
-    // Count hard questions encountered in this session for verdict calibration
-    const hardInSession = questions.filter((qq) => qq.difficulty === 'brutal' || qq.difficulty === 'scenario').length;
-    const hardRatio = questions.length > 0 ? hardInSession / questions.length : 0;
-    let verdict, verdictColor, verdictDetail;
-    if (isMock) {
-      // Real PSPO I pass bar: 85% (68/80)
-      const passed = pct >= 85;
-      const timeUsed = timeLimit - mockTimeLeft;
-      const timeMin = Math.floor(timeUsed / 60);
-      const timeSec = timeUsed % 60;
-      if (pct >= 95) {
-        verdict = 'Perfect Score';
-        verdictColor = 'var(--correct)';
-        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s. Comfortably above the 85% bar with margin for exam-day nerves. Take the Scrum.org Open Assessment once more at 100% before booking.`;
-      } else if (passed) {
-        verdict = 'Pass';
-        verdictColor = 'var(--correct)';
-        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s — above the 85% bar (68/80 needed). Not much margin though. Review your missed questions and aim for 90%+ before booking.`;
-      } else if (pct >= 75) {
-        verdict = 'Almost There';
-        verdictColor = 'var(--accent)';
-        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s. Below the 85% bar but close. Review your missed questions — if most were brutal or scenario questions, focus practice there specifically.`;
-      } else {
-        verdict = 'Fail';
-        verdictColor = 'var(--wrong)';
-        verdictDetail = `You scored ${sessionCorrect}/${total} in ${timeMin}m ${timeSec}s — below the 85% bar. Go back to concept lessons for your weakest areas, work through the review queue, and retry when you're consistently hitting 85%+ on concept quizzes.`;
-      }
-    } else if (pct >= 95) {
+    const passBar = isMock ? 85 : 85;
+    let verdict, verdictColor;
+    if (pct >= 95) {
       verdict = 'Perfect Score';
       verdictColor = 'var(--correct)';
-      verdictDetail = hardRatio > 0.3
-        ? 'You\'re parsing adversarial phrasings and scenario judgment calls consistently. Pair this with the Scrum.org Open Assessment at 100% before attempting the real exam.'
-        : 'Strong accuracy. Keep at it on the harder phrasings and scenario questions mixed into each concept.';
-    } else if (pct >= 85) {
+    } else if (pct >= passBar) {
       verdict = 'Pass';
       verdictColor = 'var(--correct)';
-      verdictDetail = 'Above the 85% threshold. To build more confidence, focus on the harder phrasings and multi-paragraph scenarios — those are where high scores are won or lost.';
     } else if (pct >= 70) {
       verdict = 'Almost There';
       verdictColor = 'var(--accent)';
-      verdictDetail = 'You have the concepts. The gap is usually adversarial phrasings catching you on weasel words (primary, best, first, always, except), or scenario questions where you\'re picking the most decisive option instead of the one that preserves self-management.';
     } else {
       verdict = 'Fail';
       verdictColor = 'var(--wrong)';
-      verdictDetail = 'Some concepts haven\'t fully landed yet. Start with the lesson for whichever concept came up most in your misses, then retry the quiz.';
     }
     return (
       <div className="container-max fade-in">
         <div className="mono faint" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16 }}>
-          {mode === 'mock' ? '◉ Mock Exam · Results' : mode === 'quick' ? '◎ Quick Quiz · Results' : 'Quiz · Results'}
+          {isMock ? '◉ Mock Exam · Results' : 'Quiz · Results'}
         </div>
         <h1 className="display" style={{ fontSize: 'clamp(36px, 6vw, 56px)', fontWeight: 500, margin: '0 0 8px', letterSpacing: '-0.02em', color: verdictColor }}>
           {verdict}
@@ -4890,48 +4863,8 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
             {sessionCorrect} / {total} correct
           </div>
         </div>
-        <p style={{ fontSize: 16, lineHeight: 1.6, maxWidth: 560, color: 'var(--text-dim)', marginBottom: 32 }}>
-          {verdictDetail}
-        </p>
-
-        {mode === 'mock' && (
-          <div className="card" style={{ borderLeft: '3px solid var(--accent)', marginBottom: 32, maxWidth: 680 }}>
-            <div className="mono accent" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: 12 }}>
-              Honest calibration
-            </div>
-            <div style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--text)' }}>
-              The real PSPO I exam uses questions you've never seen. Mock Exam questions come from a bank you've been practicing on, so your Mock Exam score likely <span style={{ color: 'var(--text)', fontWeight: 600 }}>overstates your real-exam readiness by 5 to 10 points</span>.
-              <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
-                <div className="mono faint" style={{ fontSize: 10, letterSpacing: '0.14em', marginBottom: 8 }}>INTERPRET ACCORDINGLY</div>
-                <div style={{ color: 'var(--text-dim)', fontSize: 13, lineHeight: 1.6 }}>
-                  <div style={{ display: 'flex', gap: 12, marginBottom: 4 }}>
-                    <span className="mono accent" style={{ minWidth: 70, fontSize: 12 }}>95%+ here</span>
-                    <span>≈ comfortable pass on the real exam (85-90%).</span>
-                  </div>
-                  <div style={{ display: 'flex', gap: 12, marginBottom: 4 }}>
-                    <span className="mono" style={{ minWidth: 70, fontSize: 12, color: 'var(--accent-dim)' }}>87% here</span>
-                    <span>≈ risky. You'd be near the pass bar, not past it.</span>
-                  </div>
-                  <div style={{ display: 'flex', gap: 12 }}>
-                    <span className="mono" style={{ minWidth: 70, fontSize: 12, color: 'var(--wrong)' }}>&lt;85% here</span>
-                    <span>= don't book the real exam yet.</span>
-                  </div>
-                </div>
-                <div style={{ marginTop: 12, fontSize: 13, color: 'var(--text-dim)', lineHeight: 1.55 }}>
-                  Book the real exam when you can hit <span style={{ color: 'var(--text)', fontWeight: 600 }}>95%+ on this Mock Exam</span> AND <span style={{ color: 'var(--text)', fontWeight: 600 }}>100% on the Scrum.org Open Assessment</span>, consistently.
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <button className="btn primary" onClick={onBack}>Done</button>
-          {sessionWrong > 0 && (
-            <div className="mono faint" style={{ fontSize: 11, letterSpacing: '0.1em', alignSelf: 'center' }}>
-              Missed questions are now in your Review Queue
-            </div>
-          )}
         </div>
       </div>
     );
@@ -4947,9 +4880,6 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
       </div>
     );
   }
-
-  const globalOffset = phases ? phases.slice(0, phaseIdx).reduce((s, p) => s + p.questions.length, 0) : 0;
-  const globalIdx = globalOffset + idx;
 
   const selectCount = q.selectCount || (q.type === 'multi' ? q.correct.length : 1);
   const canSubmit = selected.length === selectCount;
@@ -4971,16 +4901,42 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
     }
   }
 
+  function loadStateForQuestion(targetQ) {
+    if (isMock) {
+      setSelected(mockAnswers[targetQ.id] || []);
+      setRevealed(false);
+      setWasCorrect(null);
+    } else {
+      const saved = sessionAnswers[targetQ.id];
+      if (saved) {
+        setSelected(saved.selected);
+        setRevealed(true);
+        setWasCorrect(saved.wasCorrect);
+      } else {
+        setSelected([]);
+        setRevealed(false);
+        setWasCorrect(null);
+      }
+    }
+  }
+
   async function submit() {
     if (!canSubmit || revealed) return;
     const correct = arraysEqualAsSet(selected, q.correct);
     setWasCorrect(correct);
     setRevealed(true);
-    if (!answered.has(globalIdx)) {
-      setAnswered((prev) => { const n = new Map(prev); n.set(globalIdx, correct); return n; });
+    if (!sessionAnswers[q.id]) {
       if (correct) setSessionCorrect((x) => x + 1); else setSessionWrong((x) => x + 1);
       onComplete(q.id, correct);
     }
+    setSessionAnswers((prev) => ({ ...prev, [q.id]: { selected, wasCorrect: correct } }));
+  }
+
+  function isAtFirst() {
+    return idx === 0 && (!phases || phaseIdx === 0);
+  }
+  function isAtLast() {
+    return idx + 1 >= questions.length && (!phases || phaseIdx === phases.length - 1);
   }
 
   function next() {
@@ -4990,102 +4946,44 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
         return;
       }
       if (phases && phaseIdx < phases.length - 1) {
-        setPhaseTransition(true);
+        const nextPhaseQ = phases[phaseIdx + 1].questions[0];
+        setPhaseIdx(phaseIdx + 1);
+        setIdx(0);
+        loadStateForQuestion(nextPhaseQ);
         return;
       }
       setFinished(true);
       return;
     }
     setIdx(idx + 1);
-    const nextQ = questions[idx + 1];
-    setSelected(isMock ? (mockAnswers[nextQ.id] || []) : []);
-    setRevealed(false);
-    setWasCorrect(null);
-  }
-
-  function advancePhase() {
-    setPhaseIdx((p) => p + 1);
-    setPhaseTransition(false);
-    setIdx(0);
-    setSelected([]);
-    setRevealed(false);
-    setWasCorrect(null);
+    loadStateForQuestion(questions[idx + 1]);
   }
 
   function prev() {
-    if (idx === 0) return;
-    setIdx(idx - 1);
-    const prevQ = questions[idx - 1];
-    setSelected(isMock ? (mockAnswers[prevQ.id] || []) : []);
-    setRevealed(false);
-    setWasCorrect(null);
-  }
-
-  function jumpToGlobal(globalIndex) {
-    setSelected([]);
-    setRevealed(false);
-    setWasCorrect(null);
-    if (!phases) {
-      setIdx(globalIndex);
-      return;
-    }
-    let rem = globalIndex;
-    for (let p = 0; p < phases.length; p++) {
-      if (rem < phases[p].questions.length) {
-        if (p !== phaseIdx) { setPhaseIdx(p); setPhaseTransition(false); }
-        setIdx(rem);
-        return;
+    if (idx === 0) {
+      if (phases && phaseIdx > 0) {
+        const prevPhase = phases[phaseIdx - 1];
+        const lastIdx = prevPhase.questions.length - 1;
+        setPhaseIdx(phaseIdx - 1);
+        setIdx(lastIdx);
+        loadStateForQuestion(prevPhase.questions[lastIdx]);
       }
-      rem -= phases[p].questions.length;
-    }
-  }
-
-  function skipQuestion() {
-    setSkipped((prev) => { const n = new Set(prev); n.add(globalIdx); return n; });
-    if (idx + 1 >= questions.length) {
-      if (phases && phaseIdx < phases.length - 1) { setPhaseTransition(true); return; }
-      setFinished(true);
       return;
     }
-    setIdx(idx + 1);
-    setSelected([]);
-    setRevealed(false);
-    setWasCorrect(null);
+    setIdx(idx - 1);
+    loadStateForQuestion(questions[idx - 1]);
   }
 
-  function toggleBookmark() {
-    setBookmarked((prev) => { const n = new Set(prev); n.has(globalIdx) ? n.delete(globalIdx) : n.add(globalIdx); return n; });
-  }
-
-  // Phase transition screen
-  if (phases && phaseTransition) {
-    const nextPhase = phases[phaseIdx + 1];
-    const doneTotal = sessionCorrect + sessionWrong;
-    const phasesCompleted = phaseIdx + 1;
-    return (
-      <div className="container-max fade-in">
-        <div className="mono faint" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 24 }}>
-          Phase {phasesCompleted} of {phases.length} complete
-        </div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginBottom: 32 }}>
-          <div className="numeric display" style={{ fontSize: 56, lineHeight: 1, color: 'var(--accent)' }}>
-            {doneTotal > 0 ? Math.round((sessionCorrect / doneTotal) * 100) : 0}%
-          </div>
-          <div className="mono dim" style={{ fontSize: 13 }}>so far · {sessionCorrect}/{doneTotal} correct</div>
-        </div>
-        <div className="rule" style={{ margin: '0 0 32px' }} />
-        <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 12 }}>
-          Up next · Phase {phasesCompleted + 1} of {phases.length}
-        </div>
-        <h1 className="display" style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 500, margin: '0 0 10px', letterSpacing: '-0.02em' }}>
-          {nextPhase.name}
-        </h1>
-        <p className="dim" style={{ fontSize: 15, maxWidth: 480, margin: '0 0 32px', lineHeight: 1.55 }}>
-          {nextPhase.subtitle} · {nextPhase.questions.length} question{nextPhase.questions.length !== 1 ? 's' : ''}
-        </p>
-        <button className="btn primary" onClick={advancePhase}>Start phase {phasesCompleted + 1} →</button>
-      </div>
-    );
+  function jumpToPhase(targetPhaseIdx, targetQIdx) {
+    if (phases) {
+      if (targetPhaseIdx !== phaseIdx) setPhaseIdx(targetPhaseIdx);
+      const target = phases[targetPhaseIdx].questions[targetQIdx];
+      setIdx(targetQIdx);
+      loadStateForQuestion(target);
+    } else {
+      setIdx(targetQIdx);
+      loadStateForQuestion(questions[targetQIdx]);
+    }
   }
 
   // Mock-exam confirm-submit interstitial
@@ -5133,8 +5031,8 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
   // Mock-exam timer formatting
   const mockTimeMin = Math.floor(mockTimeLeft / 60);
   const mockTimeSec = mockTimeLeft % 60;
-  const timerWarning = isMock && mockTimeLeft < timeLimit * 0.25;
-  const timerCritical = isMock && mockTimeLeft < timeLimit * 0.1;
+  const timerWarning = isMock && mockTimeLeft < 10 * 60; // Last 10 minutes
+  const timerCritical = isMock && mockTimeLeft < 5 * 60; // Last 5 minutes
   const answeredCount = isMock ? Object.keys(mockAnswers).length : 0;
 
   return (
@@ -5171,10 +5069,17 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
                 <span style={{ margin: '0 10px' }}>·</span>
               </>
             )}
-            <>
-              <span className="numeric" style={{ color: 'var(--text)' }}>{String(answered.size).padStart(2, '0')}</span>
-              <span> / {String(phases ? phases.reduce((s, p) => s + p.questions.length, 0) : questions.length).padStart(2, '0')}</span>
-            </>
+            {phases ? (
+              <>
+                <span className="numeric" style={{ color: 'var(--text)' }}>{String(phases.slice(0, phaseIdx).reduce((s, p) => s + p.questions.length, 0) + idx + 1).padStart(2, '0')}</span>
+                <span> / {String(phases.reduce((s, p) => s + p.questions.length, 0)).padStart(2, '0')}</span>
+              </>
+            ) : (
+              <>
+                <span className="numeric" style={{ color: 'var(--text)' }}>{String(idx + 1).padStart(2, '0')}</span>
+                <span> / {String(questions.length).padStart(2, '0')}</span>
+              </>
+            )}
             <span style={{ margin: '0 12px' }}>·</span>
             <span style={{ color: 'var(--correct)' }}>{sessionCorrect}</span>
             <span> correct</span>
@@ -5182,22 +5087,25 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
         )}
       </div>
 
-      {!isMock && (
-        <PhaseProgressBar
-          phases={phases}
-          flatQuestions={!phases ? questions : undefined}
-          phaseIdx={phaseIdx}
-          questionIdx={idx}
-          bookmarked={bookmarked}
-          skipped={skipped}
-          answered={answered}
-          onJumpTo={jumpToGlobal}
-        />
-      )}
+      {phases && <PhaseProgressBar phases={phases} phaseIdx={phaseIdx} questionIdx={idx} onJump={jumpToPhase} answered={isMock ? mockAnswers : sessionAnswers} bookmarks={progress.bookmarks} />}
 
-      <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16 }}>
-        {q.type === 'tf' ? 'True / False' : selectCount === 1 ? 'Single answer' : `Choose ${selectCount}`}
-      </div>
+      {!isMock && (
+        <div className="mono faint" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 16 }}>
+          {CONCEPTS.find((c) => c.id === q.concept)?.label}
+          {q.difficulty === 'brutal' && (
+            <>
+              <span style={{ margin: '0 10px' }}>·</span>
+              <span style={{ color: 'var(--wrong)', letterSpacing: '0.2em' }}>◆ BRUTAL</span>
+            </>
+          )}
+          {q.difficulty === 'scenario' && (
+            <>
+              <span style={{ margin: '0 10px' }}>·</span>
+              <span style={{ color: 'var(--accent)', letterSpacing: '0.2em' }}>◆ SCENARIO</span>
+            </>
+          )}
+        </div>
+      )}
 
       {q.context && (
         <div style={{
@@ -5216,9 +5124,60 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
         </div>
       )}
 
-      <h2 className="display" style={{ fontSize: 'clamp(22px, 3.2vw, 28px)', lineHeight: 1.35, fontWeight: 500, margin: '0 0 28px', letterSpacing: '-0.01em' }}>
-        {q.difficulty === 'brutal' ? defangBrutalQuestion(q.q) : q.q}
-      </h2>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, margin: '0 0 18px' }}>
+        <h2 className="display" style={{ fontSize: 'clamp(22px, 3.2vw, 28px)', lineHeight: 1.35, fontWeight: 500, margin: 0, letterSpacing: '-0.01em', flex: 1 }}>
+          {q.difficulty === 'brutal' ? defangBrutalQuestion(q.q) : q.q}
+        </h2>
+        {onToggleBookmark && (() => {
+          const bookmarked = !!(progress?.bookmarks && progress.bookmarks[q.id]);
+          return (
+            <button
+              type="button"
+              onClick={() => onToggleBookmark(q.id)}
+              aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark this question'}
+              title={bookmarked ? 'Bookmarked — click to remove' : 'Bookmark this question'}
+              style={{
+                marginTop: 4,
+                padding: 6,
+                lineHeight: 0,
+                color: bookmarked ? '#ff8c1a' : 'var(--text-faint)',
+                transition: 'color 0.15s, transform 0.15s',
+                flexShrink: 0,
+              }}
+            >
+              <svg width="20" height="22" viewBox="0 0 20 22" aria-hidden="true">
+                <path
+                  d="M3 1.5h14a1 1 0 0 1 1 1v18l-8-5.5-8 5.5v-18a1 1 0 0 1 1-1z"
+                  fill={bookmarked ? '#ff8c1a' : 'none'}
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          );
+        })()}
+      </div>
+
+      <div style={{
+        display: 'inline-block',
+        marginBottom: 20,
+        padding: '5px 12px',
+        fontSize: 11,
+        fontFamily: 'var(--font-mono)',
+        fontWeight: 600,
+        letterSpacing: '0.14em',
+        textTransform: 'uppercase',
+        color: 'var(--accent)',
+        border: '1px solid var(--accent-dim)',
+        background: 'var(--accent-soft)',
+      }}>
+        {q.type === 'tf'
+          ? 'Choose true or false'
+          : selectCount === 1
+            ? 'Select 1 answer'
+            : `Select ${selectCount} answers`}
+      </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
         {q.options.map((opt, i) => {
@@ -5270,24 +5229,24 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
           )}
         </div>
       ) : (
-        !revealed && (
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-            <button className="btn primary" onClick={submit} disabled={!canSubmit}>Submit</button>
-            <button className="btn ghost" onClick={skipQuestion} style={{ fontSize: 12 }}>Skip →</button>
-            <button
-              className="btn ghost"
-              onClick={toggleBookmark}
-              style={{ fontSize: 13, color: bookmarked.has(globalIdx) ? 'var(--accent)' : undefined, borderColor: bookmarked.has(globalIdx) ? 'var(--accent)' : undefined }}
-            >
-              {bookmarked.has(globalIdx) ? '★' : '☆'}
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+          <button className="btn" onClick={prev} disabled={isAtFirst()}>
+            ← Previous
+          </button>
+          {!revealed && (
+            <button className="btn primary" onClick={submit} disabled={!canSubmit}>
+              Submit
             </button>
-            {selectCount > 1 && (
-              <span className="mono faint" style={{ fontSize: 11, letterSpacing: '0.1em' }}>
-                {selected.length} / {selectCount} selected
-              </span>
-            )}
-          </div>
-        )
+          )}
+          <button className="btn primary" onClick={next}>
+            {isAtLast() ? 'Finish' : 'Next →'}
+          </button>
+          {selectCount > 1 && !revealed && (
+            <span className="mono faint" style={{ fontSize: 11, letterSpacing: '0.1em' }}>
+              Selected {selected.length} / {selectCount}
+            </span>
+          )}
+        </div>
       )}
 
       {revealed && !isMock && (
@@ -5323,19 +5282,6 @@ function QuizView({ questions: questionsProp, phases, progress, onComplete, onBa
                 </ul>
               </>
             )}
-          </div>
-
-          <div style={{ marginTop: 24, display: 'flex', gap: 10, justifyContent: 'flex-end', alignItems: 'center' }}>
-            <button
-              className="btn ghost"
-              onClick={toggleBookmark}
-              style={{ fontSize: 13, color: bookmarked.has(globalIdx) ? 'var(--accent)' : undefined, borderColor: bookmarked.has(globalIdx) ? 'var(--accent)' : undefined }}
-            >
-              {bookmarked.has(globalIdx) ? '★' : '☆'}
-            </button>
-            <button className="btn primary" onClick={next}>
-              {idx + 1 >= questions.length ? 'Finish' : 'Next →'}
-            </button>
           </div>
         </div>
       )}
@@ -5480,9 +5426,21 @@ export default function App() {
   }
 
   function resetProgress() {
-    const fresh = { ...DEFAULT_PROGRESS, questions: {} };
+    const fresh = { ...DEFAULT_PROGRESS, questions: {}, bookmarks: {} };
     setProgress(fresh);
     saveProgress(fresh);
+  }
+
+  function toggleBookmark(qid) {
+    setProgress((prev) => {
+      const prevBookmarks = prev.bookmarks || {};
+      const nextBookmarks = { ...prevBookmarks };
+      if (nextBookmarks[qid]) delete nextBookmarks[qid];
+      else nextBookmarks[qid] = true;
+      const next = { ...prev, bookmarks: nextBookmarks };
+      saveProgress(next);
+      return next;
+    });
   }
 
   function pickConcept(conceptId) {
@@ -5517,15 +5475,10 @@ export default function App() {
   }
 
   function startQuickQuiz() {
-    const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
-    const picked = [
-      ...shuffle(QUESTIONS.filter((q) => !q.difficulty)).slice(0, 14),
-      ...shuffle(QUESTIONS.filter((q) => q.difficulty === 'brutal')).slice(0, 4),
-      ...shuffle(QUESTIONS.filter((q) => q.difficulty === 'scenario')).slice(0, 2),
-    ].sort(() => Math.random() - 0.5);
-    setQuizSet(picked);
+    const shuffled = [...QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 10);
+    setQuizSet(shuffled);
     setActiveConcept(null);
-    setQuizMode('quick');
+    setQuizMode('mixed');
     setView('quiz');
   }
 
@@ -5619,6 +5572,7 @@ export default function App() {
           onBack={exitQuiz}
           mode={quizMode}
           conceptId={activeConcept}
+          onToggleBookmark={toggleBookmark}
         />
       )}
 
